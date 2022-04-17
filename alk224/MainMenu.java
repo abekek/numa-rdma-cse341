@@ -67,13 +67,13 @@ public class MainMenu{
                     startPropMngMenu(con, s, scnr);
                     break;
                 case 2:
-                    System.out.println("Tenant menu is not implemented yet.");
+                    startTenantMenu(con, s, scnr);
                     break;
                 case 3:
-                    System.out.println("NUMA Manager menu is not implemented yet.");
+                    startNUMAMngrMenu(con, s, scnr);
                     break;
                 case 4:
-                    System.out.println("Business Manager menu is not implemented yet.");
+                    startBusMngrMenu(con, s, scnr);
                     break;
                 case 5:
                     System.out.println("\nThank you for using NUMA!");
@@ -119,5 +119,79 @@ public class MainMenu{
                     continue;
             }
         } while(choice != 4);
+    }
+
+    public static void startTenantMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
+        int choice = -1;
+        
+        do{
+            System.out.println("\nWhat would you like to do?");
+            System.out.println("1. Check Payment Status");
+            System.out.println("2. Make Rental Payment");
+            System.out.println("3. Add a Person/Pet");
+            System.out.println("4. Set Move-out Date");
+            System.out.println("5. Update Personal Data");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choice = scnr.nextInt();
+            }
+
+            switch(choice){
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    break;
+                case 6:
+                    System.out.println("Exiting to main menu.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(choice != 6);
+    }
+
+    public static void startNUMAMngrMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
+        int choice = -1;
+        
+        do{
+            System.out.println("\nWhat would you like to do?");
+            System.out.println("1. Add a New Property");
+            System.out.println("2. Exit");
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choice = scnr.nextInt();
+            }
+
+            switch(choice){
+                case 1:
+                    break;
+                case 2:
+                    System.out.println("Exiting to main menu.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(choice != 2);
+    }
+
+    public static void startBusMngrMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
+        System.out.println("Business Manager menu is not implemented yet.");
     }
 }
