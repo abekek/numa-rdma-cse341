@@ -1,0 +1,17 @@
+JAVAC=javac
+sources = $(wildcard ./alk224/*.java)
+classes = $(sources:.java=.class)
+
+all: Program.jar
+
+Program.jar: $(classes)
+
+clean:
+	-rm -f *.class
+	-rm -f *.jar
+
+%.class: %.java
+	$(JAVAC) $<
+
+jar: $(classes)
+	jar cfmv Program.jar Manifest.txt $(classes)
