@@ -123,6 +123,50 @@ public class MainMenu{
 
     public static void startTenantMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
         int choice = -1;
+
+        do{
+            System.out.println("\nAre you a new tenant?");
+            System.out.println("1. Yes");
+            System.out.println("2. No");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choice = scnr.nextInt();
+            }
+
+            switch(choice){
+                case 1:
+                    registerTenant(con, s, scnr);
+                    break;
+                case 2:
+                    loginTenant(con, s, scnr);
+                    break;
+                case 3:
+                    System.out.println("Exiting to main menu.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(choice != 3);
+    }
+
+    public static void loginTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
+        
+    }
+
+    public static void registerTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
+
+    }
+
+    public static void startOldTenantMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
+        int choice = -1;
         
         do{
             System.out.println("\nWhat would you like to do?");
@@ -152,7 +196,7 @@ public class MainMenu{
                     updatePersonalData(con, s, scnr);
                     break;
                 case 6:
-                    System.out.println("Exiting to main menu.");
+                    System.out.println("Exiting to tenant menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
@@ -161,7 +205,7 @@ public class MainMenu{
         } while(choice != 6);
     }
 
-    public static void updatePersonalData(Connection con, Statement s, Scanner scnr){
+    public static void updatePersonalData(Connection con, Statement s, Scanner scnr) throws SQLException{
         int choice = -1;
         do{
             System.out.println("\nPlease, choose what you want to update.");
@@ -216,7 +260,7 @@ public class MainMenu{
                     attrChoice = tenantAttrs.get(choice);
                     break;
                 case 11:
-                    System.out.println("Exiting to main menu.");
+                    System.out.println("Exiting to tenant menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
