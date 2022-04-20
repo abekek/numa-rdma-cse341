@@ -64,7 +64,8 @@ public class MainMenu{
 
             switch(choice){
                 case 1:
-                    startPropMngMenu(con, s, scnr);
+                    // startPropMngMenu(con, s, scnr);
+                    PropMngMenu.startMenu();
                     break;
                 case 2:
                     startTenantMenu(con, s, scnr);

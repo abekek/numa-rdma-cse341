@@ -1,14 +1,9 @@
-MainMenu.jar: MainMenu.class
-	jar cfmv MainMenu.jar Manifest.txt MainMenu.class
-
-MainMenu.class: ./alk224/MainMenu.java
-	javac ./alk224/MainMenu.java
-	mv ./alk224/MainMenu.class ./MainMenu.class
-
-PropMngMenu.class: ./alk224/PropMngMenu.java
-	javac ./alk224/PropMngMenu.java
-	mv ./alk224/PropMngMenu.class ./PropMngMenu.class
+MainMenu.jar:
+	javac ./alk224/*.java
+	mv **/*.class ./
+	mv ./DataGen.class ./datagen/DataGen.class
+	jar cfmv MainMenu.jar Manifest.txt PropMngMenu.class MainMenu.class
 
 clean:
 	rm -f *.class
-	rm -f *.jar
+	rm -f MainMenu.jar

@@ -4,16 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class PropMngMenu {
-    private Connection con;
-    private Statement s;
-
-    public PropMngMenu(Connection con, Statement s) {
-        // TODO implement here
-        this.con = con;
-        this.s = s;
-    }
-
-    public void startMenu() throws SQLException, IOException, java.lang.ClassNotFoundException{
+    public static void startMenu(){
         System.out.println("test");
     }
 }
