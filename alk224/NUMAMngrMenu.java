@@ -3,16 +3,14 @@ import java.sql.*;
 import java.io.*;
 import java.util.*;
 
-public class PropMngMenu {
+public class NUMAMngrMenu {
     public static void startMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
         int choice = -1;
         
         do{
             System.out.println("\nWhat would you like to do?");
-            System.out.println("1. Record Visit Data");
-            System.out.println("2. Record Lease Data");
-            System.out.println("3. Record Move-out");
-            System.out.println("4. Exit");
+            System.out.println("1. Add a New Property");
+            System.out.println("2. Exit");
             System.out.print("Enter your choice: ");
 
             // validating entered choice
@@ -26,16 +24,14 @@ public class PropMngMenu {
 
             switch(choice){
                 case 1:
-                case 2:
-                case 3:
                     break;
-                case 4:
+                case 2:
                     System.out.println("Exiting to main menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-        } while(choice != 4);
+        } while(choice != 2);
     }
 }
