@@ -77,6 +77,8 @@ public class TenantMenu{
                     viewPersonalData(con, s, scnr, "66-7451013");
                     break;
                 case 2:
+                    viewApartmentData(con, s, scnr, "66-7451013");
+                    break;
                 case 3:
                 case 4:
                 case 5:
@@ -92,6 +94,37 @@ public class TenantMenu{
                     continue;
             }
         } while(choice != 8);
+    }
+
+    public static void viewApartmentData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+        String query = String.format("select * from (select * from (tenant natural join lease natural join apartment)) A inner join property B on A.prop_id=B.prop_id where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nApartment & Property Information");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Property Name: " + rs.getString("name"));
+                System.out.println("Property Address: " + rs.getString(25));
+                System.out.println("Property State: " + rs.getString(26));
+                System.out.println("Property City: " + rs.getString(27));
+                System.out.println("Apartment Number: " + rs.getString("apt_num"));
+                System.out.println("Monthly Rent: " + rs.getString("monthly_rent"));
+                System.out.println("Security Deposit: " + rs.getString("security_dep"));
+                System.out.println("Area: " + rs.getString("area"));
+                System.out.println("Bedrooms Number: " + rs.getString("bdrm_num"));
+                System.out.println("Bathrooms Number: " + rs.getString("bthrm_num"));
+                System.out.println("Type: " + rs.getString("type"));
+                System.out.println("Occupation: " + rs.getString("occupation"));
+                System.out.println("Company: " + rs.getString("company"));
+                System.out.println("Salary: " + rs.getString("salary"));
+                System.out.println("Number of dependents: " + rs.getString("num_dependent"));
+                System.out.println("Lease ID: " + rs.getString("lease_id"));
+                System.out.println();
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
     }
 
     public static void viewPersonalData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
@@ -124,7 +157,6 @@ public class TenantMenu{
         } catch (SQLException e) {
             System.out.println("Error while getting column names. "+ e.getMessage());
         }
-
     }
 
     public static void updatePersonalData(Connection con, Statement s, Scanner scnr) throws SQLException{
