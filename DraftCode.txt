@@ -15,3 +15,8 @@ clean:
 
 jar: $(classes)
 	jar cfmv Program.jar Manifest.txt $(classes)
+
+
+select * from
+tenant natural join lease natural join apartment
+where tenant.id='66-7451013'

@@ -41,11 +41,11 @@ public class TenantMenu{
     }
 
     public static void loginTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
-        
+        // TODO: implement login
     }
 
     public static void registerTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
-
+        // TODO: implement registration
     }
 
     public static void startOldTenantMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
@@ -53,12 +53,14 @@ public class TenantMenu{
         
         do{
             System.out.println("\nWhat would you like to do?");
-            System.out.println("1. Check Payment Status");
-            System.out.println("2. Make Rental Payment");
-            System.out.println("3. Add a Person/Pet");
-            System.out.println("4. Set Move-out Date");
-            System.out.println("5. Update Personal Data");
-            System.out.println("6. Exit");
+            System.out.println("1. View your personal information");
+            System.out.println("2. View your apartment information");
+            System.out.println("3. Check Payment Status");
+            System.out.println("4. Make Rental Payment");
+            System.out.println("5. Add a Person/Pet");
+            System.out.println("6. Set Move-out Date");
+            System.out.println("7. Update Personal Data");
+            System.out.println("8. Exit");
             System.out.print("Enter your choice: ");
 
             // validating entered choice
@@ -72,20 +74,57 @@ public class TenantMenu{
 
             switch(choice){
                 case 1:
+                    viewPersonalData(con, s, scnr, "66-7451013");
+                    break;
                 case 2:
                 case 3:
                 case 4:
                 case 5:
+                case 6:
+                case 7:
                     updatePersonalData(con, s, scnr);
                     break;
-                case 6:
+                case 8:
                     System.out.println("Exiting to tenant menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-        } while(choice != 6);
+        } while(choice != 8);
+    }
+
+    public static void viewPersonalData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+        String query = String.format("select * from tenant natural join person natural join customer where id='%s'", tenantId);
+        
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nPersonal Information");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("ID: " + rs.getString("id"));
+                System.out.println("SSN: " + rs.getString("ssn"));
+                System.out.println("Last Name: " + rs.getString("last_name"));
+                System.out.println("Middle Name: " + rs.getString("middle_name"));
+                System.out.println("First Name: " + rs.getString("first_name"));
+                System.out.println("Phone Number: " + rs.getString("phone"));
+                System.out.println("Email: " + rs.getString("email"));
+                System.out.println("Address: " + rs.getString("address"));
+                System.out.println("Country: " + rs.getString("country"));
+                System.out.println("State: " + rs.getString("state"));
+                System.out.println("City: " + rs.getString("city"));
+                System.out.println("Account: " + rs.getString("account"));
+                System.out.println("Occupation: " + rs.getString("occupation"));
+                System.out.println("Company: " + rs.getString("company"));
+                System.out.println("Salary: " + rs.getString("salary"));
+                System.out.println("Number of dependents: " + rs.getString("num_dependent"));
+                System.out.println("Lease ID: " + rs.getString("lease_id"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
     }
 
     public static void updatePersonalData(Connection con, Statement s, Scanner scnr) throws SQLException{

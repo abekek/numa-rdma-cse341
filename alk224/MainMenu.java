@@ -67,7 +67,7 @@ public class MainMenu{
                     PropMngMenu.startMenu(con, s, scnr);
                     break;
                 case 2:
-                    TenantMenu.startMenu(con, s, scnr);
+                    TenantMenu.startOldTenantMenu(con, s, scnr);
                     break;
                 case 3:
                     NUMAMngrMenu.startMenu(con, s, scnr);
