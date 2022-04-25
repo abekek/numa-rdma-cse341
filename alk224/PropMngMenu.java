@@ -47,28 +47,25 @@ public class PropMngMenu {
         String newVisitId = "";
         String customerId = "";
 
-        do {
-            System.out.print("\nPlease enter the customer ID: ");
-            customerId = scnr.next();
+        System.out.print("\nPlease enter the customer ID: ");
+        customerId = scnr.next();
 
-            try{
-                ResultSet rs = s.executeQuery(query);
-                rs.next();
-                newVisitId = rs.getString(1);
-                newVisitId = Integer.parseInt(newVisitId) + 1 + "";
-                System.out.println("New Visit ID: " + newVisitId);
-                System.out.println("Customer ID: " + customerId);
+        try{
+            ResultSet rs = s.executeQuery(query);
+            rs.next();
+            newVisitId = rs.getString(1);
+            newVisitId = Integer.parseInt(newVisitId) + 1 + "";
+            System.out.println("New Visit ID: " + newVisitId);
+            System.out.println("Customer ID: " + customerId);
 
-                System.out.print("Please enter the details of the visit: ");
-                scnr.nextLine();
-                String details = scnr.nextLine();
+            System.out.print("Please enter the details of the visit: ");
+            scnr.nextLine();
+            String details = scnr.nextLine();
 
-                query = String.format("insert into visit_data values ('%s', '%s', '%s')", newVisitId, details, customerId);
-                s.executeUpdate(query);
-                break;
-            } catch(SQLException e){
-                System.out.println("Error: " + e.getMessage());
-            }
-        } while(true);
+            query = String.format("insert into visit_data values ('%s', '%s', '%s')", newVisitId, details, customerId);
+            s.executeUpdate(query);
+        } catch(SQLException e){
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }
