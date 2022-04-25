@@ -83,6 +83,8 @@ public class TenantMenu{
                 case 4:
                 case 5:
                 case 6:
+                    setMoveoutDate(con, s, scnr);
+                    break;
                 case 7:
                     updatePersonalData(con, s, scnr);
                     break;
@@ -94,6 +96,10 @@ public class TenantMenu{
                     continue;
             }
         } while(choice != 8);
+    }
+
+    public static void setMoveoutDate(Connection con, Statement s, Scanner scnr) throws SQLException{
+        
     }
 
     public static void viewApartmentData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
