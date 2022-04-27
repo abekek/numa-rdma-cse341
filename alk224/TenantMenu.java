@@ -74,10 +74,10 @@ public class TenantMenu{
 
             switch(choice){
                 case 1:
-                    viewPersonalData(con, s, scnr, "66-7451013");
+                    viewPersonalData(con, s, scnr, "345");
                     break;
                 case 2:
-                    viewApartmentData(con, s, scnr, "66-7451013");
+                    viewApartmentData(con, s, scnr, "345");
                     break;
                 case 3:
                 case 4:
@@ -157,7 +157,7 @@ public class TenantMenu{
                 System.out.println("Company: " + rs.getString("company"));
                 System.out.println("Salary: " + rs.getString("salary"));
                 System.out.println("Number of dependents: " + rs.getString("num_dependent"));
-                System.out.println("Lease ID: " + rs.getString("lease_id"));
+                // System.out.println("Lease ID: " + rs.getString("lease_id"));
             }
 
         } catch (SQLException e) {

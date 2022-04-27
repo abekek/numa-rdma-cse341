@@ -2,6 +2,9 @@ import java.util.Scanner;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class DataGen{
     public static void main(String[] args) throws SQLException, IOException, java.lang.ClassNotFoundException{
@@ -18,63 +21,17 @@ public class DataGen{
             Connection con = DriverManager.getConnection("jdbc:oracle:thin:@edgar1.cse.lehigh.edu:1521:cse241", userID, password);
             Statement s = con.createStatement();
         ) { 
-
-            // ------------------------------------------------------------
-            // GENERATING DATA FOR TABLES: LEASE, PAYMENT
-            // ------------------------------------------------------------
-            // File file = new File("LEASE.csv");
-            File file = new File("lease1.csv");
-            FileReader fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
-            String line = "";
-
-            int rowNum = 0;
-            String[] dataLease;
-            while((line = br.readLine()) != null){
-                ResultSet result;
-                dataLease = line.split(",");
-                String[] attributes = new String[4];
-                int i = 0;
-                for(String attr: dataLease){
-                    if(attr.equals(""))
-                        attr = "null";
-                    attr = attr.replace("\'", " ");
-                    attributes[i++] = attr;
-                }
-
-                String[] paymentTypes = {"CASH", "CHECK", "CREDIT"};
-                double paymentAmount = Math.random()*(50000)+100;
-                String queryInsertPayment = String.format("INSERT INTO PAYMENT VALUES('%s', '%s', '%s')", attributes[3], Double.toString(paymentAmount), paymentTypes[(int)(Math.random()*3)]);
-                s.executeUpdate(queryInsertPayment);
-
-                String queryInsertLease = String.format("INSERT INTO LEASE VALUES ('%s', '%s', '%s', '', '', '%s', '%s')", attributes[0], attributes[1], attributes[2], Double.toString(paymentAmount), attributes[3]);
-                s.executeUpdate(queryInsertLease);
-
-                if(rowNum%2==0){
-                    String queryInsertMbmLease = String.format("INSERT INTO MBM_LEASE VALUES('%s', '%s')", attributes[0], (int)(Math.random()*25+5));
-                    s.executeUpdate(queryInsertMbmLease);
-                }
-                else{
-                    String queryInsertFixedLease = String.format("INSERT INTO FIXED_LEASE VALUES('%s', '%s')", attributes[0], (int)(Math.random()*2+1));
-                    s.executeUpdate(queryInsertFixedLease);
-                }
-
-                if((rowNum+1)%100 == 0)
-                    System.out.printf("%d rows of payments are inserted\n", rowNum+1);
-
-                rowNum++;
-            }
-
             // ------------------------------------------------------------
             // GENERATING DATA FOR TABLES: PERSON, CUSTOMER, TENANT
             // ------------------------------------------------------------
             // file = new File("PEOPLE.csv");
-            file = new File("people_data.csv");
-            fr = new FileReader(file);
-            br = new BufferedReader(fr);
-            line = "";
+            File file = new File("people_data.csv");
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            String line = "";
             String[] dataPerson;
-            rowNum = 0;
+            int rowNum = 0;
+            List<String> tenantIds = new ArrayList<String>();
 
             while((line = br.readLine()) != null){
                 ResultSet result;
@@ -98,13 +55,62 @@ public class DataGen{
                 s.executeQuery(queryInsertCustomer);
 
                 if(rowNum >= 100){
-                    String queryInsertTenant = String.format("INSERT INTO TENANT VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", Integer.toString(rowNum+1), attributes[1], attributes[2], attributes[3], attributes[4], attributes[5], attributes[6], attributes[7], attributes[8], attributes[9], attributes[10], rowNum - 99);
+                    String queryInsertTenant = String.format("INSERT INTO TENANT VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", Integer.toString(rowNum+1), attributes[1], attributes[2], attributes[3], attributes[4], attributes[5], attributes[6], attributes[7], attributes[8], attributes[9], attributes[10]);
                     s.executeQuery(queryInsertTenant);
+                    tenantIds.add(Integer.toString(rowNum+1));
                 }
 
                 if((rowNum+1)%100 == 0)
                     System.out.printf("%d rows of people are inserted\n", rowNum+1);
                 
+                rowNum++;
+            }
+
+            Collections.shuffle(tenantIds);
+
+            // ------------------------------------------------------------
+            // GENERATING DATA FOR TABLES: LEASE, PAYMENT
+            // ------------------------------------------------------------
+            // File file = new File("LEASE.csv");
+            file = new File("lease1.csv");
+            fr = new FileReader(file);
+            br = new BufferedReader(fr);
+            line = "";
+
+            rowNum = 0;
+            String[] dataLease;
+            while((line = br.readLine()) != null){
+                ResultSet result;
+                dataLease = line.split(",");
+                String[] attributes = new String[4];
+                int i = 0;
+                for(String attr: dataLease){
+                    if(attr.equals(""))
+                        attr = "null";
+                    attr = attr.replace("\'", " ");
+                    attributes[i++] = attr;
+                }
+
+                String[] paymentTypes = {"CASH", "CHECK", "CREDIT"};
+                double paymentAmount = Math.random()*(50000)+100;
+                String queryInsertPayment = String.format("INSERT INTO PAYMENT VALUES('%s', '%s', '%s')", attributes[3], Double.toString(paymentAmount), paymentTypes[(int)(Math.random()*3)]);
+                s.executeUpdate(queryInsertPayment);
+
+                String queryInsertLease = String.format("INSERT INTO LEASE VALUES ('%s', '%s', '%s', '%s', '', '', '%s', '%s')", attributes[0], tenantIds.get(rowNum), attributes[1], attributes[2], Double.toString(paymentAmount), attributes[3]);
+                s.executeUpdate(queryInsertLease);
+
+                if(rowNum%2==0){
+                    String queryInsertMbmLease = String.format("INSERT INTO MBM_LEASE VALUES('%s', '%s')", attributes[0], (int)(Math.random()*25+5));
+                    s.executeUpdate(queryInsertMbmLease);
+                }
+                else{
+                    String queryInsertFixedLease = String.format("INSERT INTO FIXED_LEASE VALUES('%s', '%s')", attributes[0], (int)(Math.random()*2+1));
+                    s.executeUpdate(queryInsertFixedLease);
+                }
+
+                if((rowNum+1)%100 == 0)
+                    System.out.printf("%d rows of payments are inserted\n", rowNum+1);
+
                 rowNum++;
             }
 
