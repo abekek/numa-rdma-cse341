@@ -103,20 +103,20 @@ public class PropMngMenu {
         int choice = -1;
         String newLeaseId = "";
         String customerId = "";
+        String tenantId = "";
         String dateSigned = "";
         String pet = "";
         String people = "";
         Double rate = 0.0;
 
-        System.out.print("\nPlease enter the customer ID: ");
-        customerId = scnr.next();
+        System.out.print("\nPlease enter the tenant ID: ");
+        tenantId = scnr.next();
 
         try{
             ResultSet rs = s.executeQuery(query);
             rs.next();
             newLeaseId = rs.getString(1);
             newLeaseId = Integer.parseInt(newLeaseId) + 1 + "";
-            // TODO: ask for date signed, pets, etc.
 
             boolean dateIsIncorrect = true;
             String month = "";
@@ -153,7 +153,7 @@ public class PropMngMenu {
                 
             } while(dateIsIncorrect);
 
-            String date = month + "/" + day + "/" + year;
+            dateSigned = month + "/" + day + "/" + year;
 
             int petChoice = -1;
 
@@ -250,13 +250,13 @@ public class PropMngMenu {
     
             switch(choice){
                 case 1:
-                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s', '')", newLeaseId, customerId, date, pet, people, Double.toString(rate));
+                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate));
                     s.executeUpdate(query);
                     recordMbmLease(con, s, scnr, newLeaseId);
                     System.out.println("\nLease successfully recorded.\n");
                     break;
                 case 2:
-                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s', '')", newLeaseId, customerId, date, pet, people, Double.toString(rate));
+                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate));
                     s.executeUpdate(query);
                     recordFixedLease(con, s, scnr, newLeaseId);
                     System.out.println("\nLease successfully recorded.\n");
