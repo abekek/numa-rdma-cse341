@@ -32,6 +32,7 @@ public class PropMngMenu {
                     recordLeaseData(con, s, scnr);
                     break;
                 case 3:
+                    recordMoveOut(con, s, scnr);
                     break;
                 case 4:
                     System.out.println("Exiting to main menu.");
@@ -41,6 +42,67 @@ public class PropMngMenu {
                     continue;
             }
         } while(choice != 4);
+    }
+
+    public static void recordMoveOut(Connection con, Statement s, Scanner scnr){
+        String tenantId = "";
+        
+        System.out.print("\nPlease enter the tenant ID: ");
+        tenantId = scnr.next();
+
+        try{
+            String query = String.format("select * from lease where id='%s'", tenantId);
+            ResultSet rs = s.executeQuery(query);
+
+            int choice = -1;
+            
+            while(rs.next()){
+                System.out.println("\nTenant ID: " + tenantId);
+                String lease_id = rs.getString("lease_id");
+                System.out.println("Lease ID: " + lease_id);
+                System.out.println("Move-out date: " + rs.getString("move_out_date"));
+
+                do{
+                    System.out.println("\nAre you sure you want to move out this tenant?");
+                    System.out.println("1. Yes");
+                    System.out.println("2. No");
+                    System.out.println("3. Exit");
+                    System.out.print("Enter your choice: ");
+
+                    // validating entered choice
+                    if (!scnr.hasNextInt()){
+                        System.out.println("Please input an integer.\n");
+                        scnr.next();
+                        continue;
+                    } else {
+                        choice = scnr.nextInt();
+                    }
+
+                    switch(choice){
+                        case 1:
+                            query = String.format("delete from lease where lease_id='%s'", lease_id);
+                            s.executeQuery(query);
+                            System.out.printf("\nMove-out for lease_id = %s recorded successfully.\n", lease_id);
+                            break;
+                        case 2:
+                            System.out.println("No changes made.");
+                            break;
+                        case 3:
+                            System.out.println("Exiting to main menu.");
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please try again.\n");
+                            continue;
+                    }
+                } while(choice != 3 && choice != 1 && choice != 2);
+            }
+
+            if(choice == -1){
+                System.out.println("\nTenant ID not found.\n");
+            }
+        } catch(SQLException e){
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     public static void recordMbmLease(Connection con, Statement s, Scanner scnr, String newLeaseId){
