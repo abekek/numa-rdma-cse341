@@ -205,10 +205,20 @@ public class TenantMenu{
                     updateCountry(con, s, scnr, tenantId);
                     break;
                 case 4:
+                    updateState(con, s, scnr, tenantId);
+                    break;
                 case 5:
+                    updateCity(con, s, scnr, tenantId);
+                    break;
                 case 6:
+                    updateAccount(con, s, scnr, tenantId);
+                    break;
                 case 7:
+                    updateOccupation(con, s, scnr, tenantId);
+                    break;
                 case 8:
+                    updateCompany(con, s, scnr, tenantId);
+                    break;
                 case 9:
                 case 10:
                 case 2:
@@ -224,13 +234,215 @@ public class TenantMenu{
         } while(choice != 11);
     }
 
+    public static void updateAccount(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Account");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Account: " + rs.getString("account"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String newAccount = "";
+        String ssnAccount = "^[0-9]*$";
+
+        do{
+            System.out.print("\nEnter new account number (or q to exit): ");
+            newAccount = scnr.next();
+            if(newAccount.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!newAccount.matches(ssnAccount)){
+                System.out.println("Invalid account number. Please try again.");
+                continue;
+            }
+        } while(!newAccount.matches(ssnAccount));
+
+        String updateQuery = String.format("update tenant set account='%s' where id='%s'", newAccount, tenantId);
+        try {
+            s.executeUpdate(updateQuery);
+            System.out.println("Account number updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating account number. "+ e.getMessage());
+        }
+    }
+
+    public static void updateCity(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate City");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current City: " + rs.getString("city"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+        
+        String city = "";
+        System.out.print("\nPlease enter the city: ");
+        scnr.nextLine();
+        city = scnr.nextLine();
+
+        query = "update tenant set city=? where id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, city);
+            ps.setString(2, tenantId);
+            ps.executeUpdate();
+            System.out.println("City updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating city. "+ e.getMessage());
+        }
+    }
+
+    public static void updateState(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate State");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current State: " + rs.getString("state"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String[] states = {"AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC",  
+        "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA",  
+        "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE",  
+        "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC",  
+        "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY"};
+
+        int choiceState = -1;
+        do {
+            System.out.println("\nPlease, choose your state.");
+            int i = 0;
+            for(String state : states){
+                System.out.printf("%d. %s\n", i+1, state);
+                i++;
+            }
+            System.out.printf("%d. Exit\n", states.length+1);
+
+            System.out.print("Enter your choice: ");
+            
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choiceState = scnr.nextInt();
+            }
+
+            if(choiceState > states.length+1 || choiceState < 1){
+                System.out.println("Invalid choice. Please try again.\n");
+                continue;
+            }
+
+            if(choiceState == states.length+1){
+                System.out.println("Exiting to tenant menu.");
+                break;
+            }
+
+            String state = states[choiceState-1];
+            query = String.format("update tenant set state='%s' where id='%s'", state, tenantId);
+            try {
+                s.executeUpdate(query);
+                System.out.println("State updated successfully.");
+                break;
+            } catch (SQLException e) {
+                System.out.println("Error while updating state. "+ e.getMessage());
+            }
+        } while(choiceState != states.length+1);
+    }
+
+    public static void updateCompany(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Company");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Company: " + rs.getString("company"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String company = "";
+        System.out.print("\nPlease enter the company: ");
+        scnr.nextLine();
+        company = scnr.nextLine();
+
+        query = "update tenant set company=? where id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, company);
+            ps.setString(2, tenantId);
+            ps.executeUpdate();
+            System.out.println("Company updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating company. "+ e.getMessage());
+        }
+    }
+
+    public static void updateOccupation(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Occupation");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Occupation: " + rs.getString("occupation"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String occupation = "";
+        System.out.print("\nPlease enter the occupation: ");
+        scnr.nextLine();
+        occupation = scnr.nextLine();
+
+        query = "update tenant set occupation=? where id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, occupation);
+            ps.setString(2, tenantId);
+            ps.executeUpdate();
+            System.out.println("Occupation updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating occupation. "+ e.getMessage());
+        }
+    }
+
     public static void updateCountry(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Country");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Country: " + rs.getString("country"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
         String country = "";
         System.out.print("\nPlease enter the country name: ");
         scnr.nextLine();
         country = scnr.nextLine();
 
-        String query = "update tenant set country=? where id=?";
+        query = "update tenant set country=? where id=?";
         try {
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, country);
@@ -243,12 +455,24 @@ public class TenantMenu{
     }
 
     public static void updateAddress(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Address");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Address: " + rs.getString("address"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
         String address = "";
         System.out.print("\nPlease enter the address: ");
         scnr.nextLine();
         address = scnr.nextLine();
 
-        String query = "update tenant set address=? where id=?";
+        query = "update tenant set address=? where id=?";
         try {
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, address);
