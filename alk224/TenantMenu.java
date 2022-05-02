@@ -82,8 +82,10 @@ public class TenantMenu{
                 case 3:
                 case 4:
                 case 5:
+                    addPersonPet(con, s, scnr, "1");
+                    break;
                 case 6:
-                    setMoveoutDate(con, s, scnr);
+                    setMoveoutDate(con, s, scnr, "1");
                     break;
                 case 7:
                     updatePersonalData(con, s, scnr, "1");
@@ -98,8 +100,12 @@ public class TenantMenu{
         } while(choice != 8);
     }
 
-    public static void setMoveoutDate(Connection con, Statement s, Scanner scnr) throws SQLException{
-        
+    public static void addPersonPet(Connection con, Statement s, Scanner scnr, String tenantId){
+
+    }
+
+    public static void setMoveoutDate(Connection con, Statement s, Scanner scnr, String tenantId){
+
     }
 
     public static void viewApartmentData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
@@ -164,7 +170,7 @@ public class TenantMenu{
             List<String> tenantAttrs = new ArrayList<>();
             
             try {
-                ResultSet rs = s.executeQuery("select * from person natural join customer natural join tenant where id='%s'");
+                ResultSet rs = s.executeQuery(String.format("select * from person natural join customer natural join tenant where id='%s'" , tenantId));
                 ResultSetMetaData rsMetaData = rs.getMetaData();
                 int numCols = rsMetaData.getColumnCount();
                 for (int colNum = 1; colNum <= numCols; colNum++) {

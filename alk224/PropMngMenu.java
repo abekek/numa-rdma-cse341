@@ -462,8 +462,9 @@ public class PropMngMenu {
             scnr.nextLine();
             String details = scnr.nextLine();
 
-            query = String.format("insert into visit_data values ('%s', '%s', '%s')", newVisitId, details, customerId);
+            query = String.format("insert into visit_data (description, id) values ('%s', '%s')", details, customerId);
             s.executeUpdate(query);
+            System.out.println("\nVisit data successfully recorded.\n");
         } catch(SQLException e){
             System.out.print("Error: " + e.getMessage());
         }
