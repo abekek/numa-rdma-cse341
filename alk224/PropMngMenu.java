@@ -159,9 +159,17 @@ public class PropMngMenu {
         }
     }
 
+    public static void addTenant(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("insert into tenant (id) values ('%s')", tenantId);
+        try{
+            s.executeQuery(query);
+            System.out.println("\nTenant added successfully.");
+        } catch(SQLException e){
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+    
     public static void recordLeaseData(Connection con, Statement s, Scanner scnr){
-        String query = String.format("select distinct get_max_lease_id() from lease");
-
         int choice = -1;
         String newLeaseId = "";
         String customerId = "";
@@ -173,6 +181,53 @@ public class PropMngMenu {
 
         System.out.print("\nPlease enter the tenant ID: ");
         tenantId = scnr.next();
+
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try{
+            ResultSet rs = s.executeQuery(query);
+            rs.next();
+            rs.getString("SSN");
+        } catch(SQLException e){
+            System.out.println("Tenant ID not found.");
+            int choiceAddCustomer = -1;
+            do{
+                System.out.println("\nDo you want to add this customer to the database?");
+                System.out.println("1. Yes");
+                System.out.println("2. No");
+                System.out.println("3. Exit");
+                System.out.print("Enter your choice: ");
+
+                // validating entered choice
+                if (!scnr.hasNextInt()){
+                    System.out.println("Please input an integer.\n");
+                    scnr.next();
+                    continue;
+                } else {
+                    choiceAddCustomer = scnr.nextInt();
+                }
+
+                switch(choiceAddCustomer){
+                    case 1:
+                        addTenant(con, s, scnr, tenantId);
+                        break;
+                    case 2:
+                        System.out.println("No changes made.");
+                        break;
+                    case 3:
+                        System.out.println("Exiting to main menu.");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.\n");
+                        continue;
+                }
+            } while(choiceAddCustomer != 3 && choiceAddCustomer != 1 && choiceAddCustomer != 2);
+
+            if(choiceAddCustomer == 2 || choiceAddCustomer == 3){
+                return;
+            }
+        }
+
+        query = String.format("select distinct get_max_lease_id() from lease");
 
         try{
             ResultSet rs = s.executeQuery(query);
