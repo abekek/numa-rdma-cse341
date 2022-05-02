@@ -86,7 +86,7 @@ public class TenantMenu{
                     setMoveoutDate(con, s, scnr);
                     break;
                 case 7:
-                    updatePersonalData(con, s, scnr);
+                    updatePersonalData(con, s, scnr, "1");
                     break;
                 case 8:
                     System.out.println("Exiting to tenant menu.");
@@ -110,24 +110,17 @@ public class TenantMenu{
             System.out.println("====================");
             while(rs.next()){
                 System.out.println("Property Name: " + rs.getString("name"));
-                System.out.println("Property Address: " + rs.getString(25));
-                System.out.println("Property State: " + rs.getString(26));
-                System.out.println("Property City: " + rs.getString(27));
+                System.out.println("Property Address: " + rs.getString(28));
+                System.out.println("Property State: " + rs.getString(29));
+                System.out.println("Property City: " + rs.getString(30));
                 System.out.println("Apartment Number: " + rs.getString("apt_num"));
                 System.out.println("Monthly Rent: " + rs.getString("monthly_rent"));
                 System.out.println("Security Deposit: " + rs.getString("security_dep"));
                 System.out.println("Area: " + rs.getString("area"));
                 System.out.println("Bedrooms Number: " + rs.getString("bdrm_num"));
                 System.out.println("Bathrooms Number: " + rs.getString("bthrm_num"));
-                System.out.println("Type: " + rs.getString("type"));
-                System.out.println("Occupation: " + rs.getString("occupation"));
-                System.out.println("Company: " + rs.getString("company"));
-                System.out.println("Salary: " + rs.getString("salary"));
-                System.out.println("Number of dependents: " + rs.getString("num_dependent"));
-                System.out.println("Lease ID: " + rs.getString("lease_id"));
                 System.out.println();
             }
-
         } catch (SQLException e) {
             System.out.println("Error while getting column names. "+ e.getMessage());
         }
@@ -157,15 +150,13 @@ public class TenantMenu{
                 System.out.println("Company: " + rs.getString("company"));
                 System.out.println("Salary: " + rs.getString("salary"));
                 System.out.println("Number of dependents: " + rs.getString("num_dependent"));
-                // System.out.println("Lease ID: " + rs.getString("lease_id"));
             }
-
         } catch (SQLException e) {
             System.out.println("Error while getting column names. "+ e.getMessage());
         }
     }
 
-    public static void updatePersonalData(Connection con, Statement s, Scanner scnr) throws SQLException{
+    public static void updatePersonalData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
         int choice = -1;
         do{
             System.out.println("\nPlease, choose what you want to update.");
@@ -176,7 +167,7 @@ public class TenantMenu{
                 ResultSet rs = s.executeQuery("select * from tenant");
                 ResultSetMetaData rsMetaData = rs.getMetaData();
                 int numCols = rsMetaData.getColumnCount();
-                for (int colNum = 1; colNum < numCols; colNum++) {
+                for (int colNum = 1; colNum <= numCols; colNum++) {
                     tenantAttrs.add(rsMetaData.getColumnLabel(colNum));
                 }
             } catch (SQLException e) {
@@ -204,12 +195,15 @@ public class TenantMenu{
                 choice = scnr.nextInt();
             }
 
-            String attrChoice = "";
+            // String attrChoice = tenantAttrs.get(choice);
 
             switch(choice){
                 case 1:
-                case 2:
+                    updateSSN(con, s, scnr, tenantId);
+                    break;
                 case 3:
+                    updateCountry(con, s, scnr, tenantId);
+                    break;
                 case 4:
                 case 5:
                 case 6:
@@ -217,7 +211,8 @@ public class TenantMenu{
                 case 8:
                 case 9:
                 case 10:
-                    attrChoice = tenantAttrs.get(choice);
+                case 2:
+                    updateAddress(con, s, scnr, tenantId);
                     break;
                 case 11:
                     System.out.println("Exiting to tenant menu.");
@@ -226,9 +221,80 @@ public class TenantMenu{
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-
-            // String query = String.format("update tenant set %s=%s where ID=%s", attrChoice);
-
         } while(choice != 11);
+    }
+
+    public static void updateCountry(Connection con, Statement s, Scanner scnr, String tenantId){
+        String country = "";
+        System.out.print("\nPlease enter the country name: ");
+        scnr.nextLine();
+        country = scnr.nextLine();
+
+        String query = "update tenant set country=? where id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, country);
+            ps.setString(2, tenantId);
+            ps.executeUpdate();
+            System.out.println("Country updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating country. "+ e.getMessage());
+        }
+    }
+
+    public static void updateAddress(Connection con, Statement s, Scanner scnr, String tenantId){
+        String address = "";
+        System.out.print("\nPlease enter the address: ");
+        scnr.nextLine();
+        address = scnr.nextLine();
+
+        String query = "update tenant set address=? where id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, address);
+            ps.setString(2, tenantId);
+            ps.executeUpdate();
+            System.out.println("Address updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating address. "+ e.getMessage());
+        }
+    }
+
+    public static void updateSSN(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+        String query = String.format("select * from tenant where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate SSN");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current SSN: " + rs.getString("ssn"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String newSSN = "";
+        String ssnRegex = "^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$";
+
+        do{
+            System.out.print("\nEnter new SSN (or q to exit): ");
+            newSSN = scnr.next();
+            if(newSSN.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!newSSN.matches(ssnRegex)){
+                System.out.println("Invalid SSN. Please try again.");
+                continue;
+            }
+        } while(!newSSN.matches(ssnRegex));
+
+        String updateQuery = String.format("update tenant set ssn='%s' where id='%s'", newSSN, tenantId);
+        try {
+            s.executeUpdate(updateQuery);
+            System.out.println("SSN updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating SSN. "+ e.getMessage());
+        }
     }
 }
