@@ -178,6 +178,8 @@ public class PropMngMenu {
         String pet = "";
         String people = "";
         Double rate = 0.0;
+        String propertyId = "";
+        String apartmentNum = "";
 
         System.out.print("\nPlease enter the tenant ID: ");
         tenantId = scnr.next();
@@ -239,6 +241,36 @@ public class PropMngMenu {
             String month = "";
             String day = "";
             String year = "";
+
+            do{
+                System.out.print("\nPlease enter the property ID: ");
+                propertyId = scnr.next();
+                try{
+                    query = String.format("select * from property where prop_id='%s'", propertyId);
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    rs.getString("prop_id");
+                } catch(SQLException e){
+                    System.out.println("Property ID not found.");
+                    continue;
+                }
+                System.out.print("Please enter the apartment number: ");
+                apartmentNum = scnr.next();
+                try{
+                    query = String.format("select * from apartment where prop_id='%s' and apt_num='%s'", propertyId, apartmentNum);
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    String leaseCheck = rs.getString("lease_id");
+                    if(leaseCheck != null){
+                        System.out.println("Apartment is already occupied.");
+                        continue;
+                    }
+                } catch(SQLException e){
+                    System.out.println("Apartment number not found.");
+                    continue;
+                }
+                break;
+            } while(true);
 
             do{
                 System.out.println("\nPlease enter the date lease was signed:");
