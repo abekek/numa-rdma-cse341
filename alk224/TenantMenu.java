@@ -74,10 +74,10 @@ public class TenantMenu{
 
             switch(choice){
                 case 1:
-                    viewPersonalData(con, s, scnr, "345");
+                    viewPersonalData(con, s, scnr, "1");
                     break;
                 case 2:
-                    viewApartmentData(con, s, scnr, "345");
+                    viewApartmentData(con, s, scnr, "1");
                     break;
                 case 3:
                 case 4:
@@ -164,7 +164,7 @@ public class TenantMenu{
             List<String> tenantAttrs = new ArrayList<>();
             
             try {
-                ResultSet rs = s.executeQuery("select * from tenant");
+                ResultSet rs = s.executeQuery("select * from person natural join customer natural join tenant where id='%s'");
                 ResultSetMetaData rsMetaData = rs.getMetaData();
                 int numCols = rsMetaData.getColumnCount();
                 for (int colNum = 1; colNum <= numCols; colNum++) {
@@ -182,7 +182,7 @@ public class TenantMenu{
                 System.out.printf("%d. %s\n", i+1, attr);
                 i++;
             }
-            System.out.printf("%d. Exit\n", 11);
+            System.out.printf("%d. Exit\n", 16);
 
             System.out.print("Enter your choice: ");
             
@@ -197,43 +197,84 @@ public class TenantMenu{
 
             switch(choice){
                 case 1:
-                    updateSSN(con, s, scnr, tenantId);
-                    break;
+                case 2:
                 case 3:
-                    updateCountry(con, s, scnr, tenantId);
+                    updateName(con, s, scnr, tenantId, tenantAttrs.get(choice));
                     break;
                 case 4:
-                    updateState(con, s, scnr, tenantId);
-                    break;
                 case 5:
-                    updateCity(con, s, scnr, tenantId);
-                    break;
                 case 6:
-                    updateAccount(con, s, scnr, tenantId);
-                    break;
-                case 7:
-                    updateOccupation(con, s, scnr, tenantId);
+                    updateSSN(con, s, scnr, tenantId);
                     break;
                 case 8:
-                    updateCompany(con, s, scnr, tenantId);
+                    updateCountry(con, s, scnr, tenantId);
                     break;
                 case 9:
-                    updateSalary(con, s, scnr, tenantId);
+                    updateState(con, s, scnr, tenantId);
                     break;
                 case 10:
-                    updateNumDependent(con, s, scnr, tenantId);
-                    break;
-                case 2:
-                    updateAddress(con, s, scnr, tenantId);
+                    updateCity(con, s, scnr, tenantId);
                     break;
                 case 11:
+                    updateAccount(con, s, scnr, tenantId);
+                    break;
+                case 12:
+                    updateOccupation(con, s, scnr, tenantId);
+                    break;
+                case 13:
+                    updateCompany(con, s, scnr, tenantId);
+                    break;
+                case 14:
+                    updateSalary(con, s, scnr, tenantId);
+                    break;
+                case 15:
+                    updateNumDependent(con, s, scnr, tenantId);
+                    break;
+                case 7:
+                    updateAddress(con, s, scnr, tenantId);
+                    break;
+                case 16:
                     System.out.println("Exiting to tenant menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-        } while(choice != 11);
+        } while(choice != 16);
+    }
+
+    public static void updateName(Connection con, Statement s, Scanner scnr, String tenantId, String attr){
+        String query = String.format("select * from person where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.printf("\nUpdate %s\n", attr);
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current " + attr + ": " + rs.getString(attr));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String name = "";
+        System.out.print("\nPlease enter the name (or q to exit): ");
+        scnr.nextLine();
+        name = scnr.nextLine();
+
+        if(name.equals("q")){
+            return;
+        }
+
+        query = String.format("update person set %s=? where id=?", attr);
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
+            ps.setString(2, tenantId);
+            ps.executeUpdate();
+            System.out.println("Name updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating the name. "+ e.getMessage());
+        }
     }
 
     public static void updateNumDependent(Connection con, Statement s, Scanner scnr, String tenantId){
@@ -360,9 +401,13 @@ public class TenantMenu{
         }
         
         String city = "";
-        System.out.print("\nPlease enter the city: ");
+        System.out.print("\nPlease enter the city (or q to exit): ");
         scnr.nextLine();
         city = scnr.nextLine();
+
+        if(city.equals("q")){
+            return;
+        }
 
         query = "update tenant set city=? where id=?";
         try {
@@ -452,9 +497,13 @@ public class TenantMenu{
         }
 
         String company = "";
-        System.out.print("\nPlease enter the company: ");
+        System.out.print("\nPlease enter the company (or q to exit): ");
         scnr.nextLine();
         company = scnr.nextLine();
+
+        if(company.equals("q")){
+            return;
+        }
 
         query = "update tenant set company=? where id=?";
         try {
@@ -482,9 +531,13 @@ public class TenantMenu{
         }
 
         String occupation = "";
-        System.out.print("\nPlease enter the occupation: ");
+        System.out.print("\nPlease enter the occupation (or q to exit): ");
         scnr.nextLine();
         occupation = scnr.nextLine();
+
+        if(occupation.equals("q")){
+            return;
+        }
 
         query = "update tenant set occupation=? where id=?";
         try {
@@ -512,9 +565,13 @@ public class TenantMenu{
         }
 
         String country = "";
-        System.out.print("\nPlease enter the country name: ");
+        System.out.print("\nPlease enter the country name (or q to exit): ");
         scnr.nextLine();
         country = scnr.nextLine();
+
+        if(country.equals("q")){
+            return;
+        }
 
         query = "update tenant set country=? where id=?";
         try {
@@ -542,9 +599,13 @@ public class TenantMenu{
         }
 
         String address = "";
-        System.out.print("\nPlease enter the address: ");
+        System.out.print("\nPlease enter the address (or q to exit): ");
         scnr.nextLine();
         address = scnr.nextLine();
+
+        if(address.equals("q")){
+            return;
+        }
 
         query = "update tenant set address=? where id=?";
         try {
