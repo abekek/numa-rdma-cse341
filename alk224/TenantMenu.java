@@ -195,8 +195,6 @@ public class TenantMenu{
                 choice = scnr.nextInt();
             }
 
-            // String attrChoice = tenantAttrs.get(choice);
-
             switch(choice){
                 case 1:
                     updateSSN(con, s, scnr, tenantId);
@@ -220,7 +218,11 @@ public class TenantMenu{
                     updateCompany(con, s, scnr, tenantId);
                     break;
                 case 9:
+                    updateSalary(con, s, scnr, tenantId);
+                    break;
                 case 10:
+                    updateNumDependent(con, s, scnr, tenantId);
+                    break;
                 case 2:
                     updateAddress(con, s, scnr, tenantId);
                     break;
@@ -232,6 +234,78 @@ public class TenantMenu{
                     continue;
             }
         } while(choice != 11);
+    }
+
+    public static void updateNumDependent(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select num_dependent from tenant where id='%s'", tenantId);
+        String numDependent = "";
+        try {
+            ResultSet rs = s.executeQuery(query);
+            while(rs.next()){
+                numDependent = rs.getString("num_dependent");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        System.out.printf("Current number of dependents: %s\n", numDependent);
+        int newNumDep = 0;
+
+        do{
+            System.out.print("\nEnter new number of dependents: ");
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input a number.\n");
+                scnr.next();
+                continue;
+            } else {
+                newNumDep = scnr.nextInt();
+                break;
+            }
+        } while(true);
+
+        query = String.format("update tenant set num_dependent='%s' where id='%s'", Integer.toString(newNumDep), tenantId);
+        try {
+            s.executeUpdate(query);
+            System.out.println("Number of dependents updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating number of dependents. "+ e.getMessage());
+        }
+    }
+
+    public static void updateSalary(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select salary from tenant where id='%s'", tenantId);
+        String salary = "";
+        try {
+            ResultSet rs = s.executeQuery(query);
+            while(rs.next()){
+                salary = rs.getString("salary");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        System.out.printf("Current salary: %s\n", salary);
+        double newSalary = 0.0;
+
+        do{
+            System.out.print("\nEnter new salary: ");
+            if (!scnr.hasNextDouble()){
+                System.out.println("Please input a number.\n");
+                scnr.next();
+                continue;
+            } else {
+                newSalary = scnr.nextDouble();
+                break;
+            }
+        } while(true);
+
+        query = String.format("update tenant set salary='%s' where id='%s'", String.format("%.2f", newSalary), tenantId);
+        try {
+            s.executeUpdate(query);
+            System.out.println("Salary updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating salary. "+ e.getMessage());
+        }
     }
 
     public static void updateAccount(Connection con, Statement s, Scanner scnr, String tenantId){
