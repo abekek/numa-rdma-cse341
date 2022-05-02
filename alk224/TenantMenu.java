@@ -55,12 +55,9 @@ public class TenantMenu{
             System.out.println("\nWhat would you like to do?");
             System.out.println("1. View your personal information");
             System.out.println("2. View your apartment information");
-            System.out.println("3. Check Payment Status");
-            System.out.println("4. Make Rental Payment");
-            System.out.println("5. Add a Person/Pet");
-            System.out.println("6. Set Move-out Date");
-            System.out.println("7. Update Personal Data");
-            System.out.println("8. Exit");
+            System.out.println("3. Update Personal Data");
+            System.out.println("4. Lease Actions");
+            System.out.println("5. Exit");
             System.out.print("Enter your choice: ");
 
             // validating entered choice
@@ -80,35 +77,237 @@ public class TenantMenu{
                     viewApartmentData(con, s, scnr, "1");
                     break;
                 case 3:
-                case 4:
-                case 5:
-                    addPersonPet(con, s, scnr, "1");
-                    break;
-                case 6:
-                    setMoveoutDate(con, s, scnr, "1");
-                    break;
-                case 7:
                     updatePersonalData(con, s, scnr, "1");
                     break;
-                case 8:
+                case 4:
+                    leaseActions(con, s, scnr, "1");
+                    break;
+                case 5:
                     System.out.println("Exiting to tenant menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-        } while(choice != 8);
+        } while(choice != 5);
     }
 
-    public static void addPersonPet(Connection con, Statement s, Scanner scnr, String tenantId){
+    public static void leaseActions(Connection con, Statement s, Scanner scnr, String tenantId){
+        int leaseChoice = -1;
+        String query = String.format("SELECT * FROM Lease WHERE id = %s", tenantId);
+        int i = -1;
+
+        List<String> leaseIds = new ArrayList<String>();
+
+        do{
+            System.out.println("\nWhich lease would you like to perform actions on?");
+            try{
+                ResultSet rs = s.executeQuery(query);
+                i = 1;
+                while(rs.next()){
+                    System.out.printf("\n%d. %s", i, rs.getString("lease_id"));
+                    leaseIds.add(rs.getString("lease_id"));
+                    i++;
+                }
+            } catch(SQLException e){
+                System.out.println("Error: " + e);
+                continue;
+            }
+
+            if(i==1){
+                System.out.println("\nYou have no leases.\n");
+                break;
+            }
+
+            System.out.printf("\n%d. Exit\n", i);
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                leaseChoice = scnr.nextInt();
+            }
+
+            if(leaseChoice == i){
+                System.out.println("Exiting to tenant menu.");
+                break;
+            }
+            else if(leaseChoice > i || leaseChoice < 1){
+                System.out.println("Invalid choice. Please try again.\n");
+                continue;
+            }
+            else{
+                System.out.println("\nYou have selected lease " + leaseIds.get(leaseChoice-1) + ".\n");
+                leaseMenu(con, s, scnr, tenantId, leaseIds.get(leaseChoice-1));
+            }
+        } while(leaseChoice != i);
+    }
+
+    public static void leaseMenu(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+        int choice = -1; 
+
+        do{
+            System.out.println("\nWhat would you like to do?");
+            System.out.println("1. Check Payment Status");
+            System.out.println("2. Make Rental Payment");
+            System.out.println("3. Add a Person/Pet");
+            System.out.println("4. Set Move-out Date");
+            System.out.println("5. View Lease Information");
+            System.out.println("6. Exit");
+
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choice = scnr.nextInt();
+            }
+
+            switch(choice){
+                case 1:
+                    checkPaymentStatus(con, s, scnr, tenantId, leaseId);
+                    break;
+                case 2:
+                    makeRentalPayment(con, s, scnr, tenantId, leaseId);
+                    break;
+                case 3:
+                    addPersonPet(con, s, scnr, tenantId, leaseId);
+                    break;
+                case 4:
+                    setMoveOutDate(con, s, scnr, tenantId, leaseId);
+                    break;
+                case 5:
+                    viewLeaseInfo(con, s, scnr, tenantId, leaseId);
+                    break;
+                case 6:
+                    System.out.println("Exiting to tenant menu.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(choice != 6);
+    }
+
+    public static void viewLeaseInfo(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+        String query = String.format("select * from Lease where lease_id = %s", leaseId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nLease Information");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Lease ID: " + rs.getString("lease_id"));
+                System.out.println("Date signed: " + rs.getString("date_signed"));
+                System.out.println("Pets: " + rs.getString("pet"));
+                System.out.println("People: " + rs.getString("people"));
+                System.out.println("Move-out date: " + rs.getString("move_out_date"));
+                System.out.println("Rate: " + rs.getString("rate"));
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+    }
+
+    public static void checkPaymentStatus(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+        
+    }
+
+    public static void makeRentalPayment(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+        
+    }
+
+    public static void addPersonPet(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+        String pet = "";
+        String people = "";
+        String query = "";
+
+        int petChoice = -1;
+
+        do{
+            System.out.println("\nDo you want to add any pets?");
+            System.out.println("1. Yes");
+            System.out.println("2. No");
+
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                petChoice = scnr.nextInt();
+            }
+
+            switch(petChoice){
+                case 1:
+                    pet = PropMngMenu.recordPet(con, s, scnr);
+                    try{
+                        query = String.format("update lease set pet = '%s' where lease_id = '%s'", pet, leaseId);
+                        s.executeUpdate(query);
+                    } catch(SQLException e){
+                        System.out.println("Error: " + e);
+                        continue;
+                    }
+                    break;
+                case 2:
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(petChoice != 2 && petChoice != 1);
+
+        int peopleChoice = -1;
+
+        do{
+            System.out.println("\nDo you want to add any people?");
+            System.out.println("1. Yes");
+            System.out.println("2. No");
+
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                peopleChoice = scnr.nextInt();
+            }
+
+            switch(peopleChoice){
+                case 1:
+                    people = PropMngMenu.recordPeople(con, s, scnr);
+                    try{
+                        query = String.format("update lease set people = '%s' where lease_id = '%s'", people, leaseId);
+                        s.executeUpdate(query);
+                    } catch(SQLException e){
+                        System.out.println("Error: " + e);
+                        continue;
+                    }
+                    break;
+                case 2:
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(peopleChoice != 2 && peopleChoice != 1);
+    }
+
+    public static void setMoveOutDate(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
 
     }
 
-    public static void setMoveoutDate(Connection con, Statement s, Scanner scnr, String tenantId){
-
-    }
-
-    public static void viewApartmentData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+    public static void viewApartmentData(Connection con, Statement s, Scanner scnr, String tenantId){
         String query = String.format("select * from (select * from (tenant natural join lease natural join apartment)) A inner join property B on A.prop_id=B.prop_id where id='%s'", tenantId);
         try {
             ResultSet rs = s.executeQuery(query);
@@ -119,6 +318,7 @@ public class TenantMenu{
                 System.out.println("Property Address: " + rs.getString(28));
                 System.out.println("Property State: " + rs.getString(29));
                 System.out.println("Property City: " + rs.getString(30));
+                System.out.println("Lease ID: " + rs.getString("lease_id"));
                 System.out.println("Apartment Number: " + rs.getString("apt_num"));
                 System.out.println("Monthly Rent: " + rs.getString("monthly_rent"));
                 System.out.println("Security Deposit: " + rs.getString("security_dep"));
@@ -132,7 +332,7 @@ public class TenantMenu{
         }
     }
 
-    public static void viewPersonalData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+    public static void viewPersonalData(Connection con, Statement s, Scanner scnr, String tenantId) {
         String query = String.format("select * from tenant natural join person natural join customer where id='%s'", tenantId);
         
         try {
@@ -162,7 +362,7 @@ public class TenantMenu{
         }
     }
 
-    public static void updatePersonalData(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+    public static void updatePersonalData(Connection con, Statement s, Scanner scnr, String tenantId){
         int choice = -1;
         do{
             System.out.println("\nPlease, choose what you want to update.");
@@ -706,7 +906,7 @@ public class TenantMenu{
         }
     }
 
-    public static void updateSSN(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
+    public static void updateSSN(Connection con, Statement s, Scanner scnr, String tenantId){
         String query = String.format("select * from tenant where id='%s'", tenantId);
         try {
             ResultSet rs = s.executeQuery(query);
