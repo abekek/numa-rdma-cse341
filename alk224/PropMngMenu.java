@@ -402,12 +402,16 @@ public class PropMngMenu {
                     query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate));
                     s.executeUpdate(query);
                     recordMbmLease(con, s, scnr, newLeaseId);
+                    query = String.format("update apartment set lease_id='%s' where prop_id='%s' and apt_num='%s'", newLeaseId, propertyId, apartmentNum);
+                    s.executeUpdate(query);
                     System.out.println("\nLease successfully recorded.\n");
                     break;
                 case 2:
                     query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate));
                     s.executeUpdate(query);
                     recordFixedLease(con, s, scnr, newLeaseId);
+                    query = String.format("update apartment set lease_id='%s' where prop_id='%s' and apt_num='%s'", newLeaseId, propertyId, apartmentNum);
+                    s.executeUpdate(query);
                     System.out.println("\nLease successfully recorded.\n");
                     break;
                 case 3:
