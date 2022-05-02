@@ -216,11 +216,51 @@ public class TenantMenu{
     }
 
     public static void checkPaymentStatus(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
-        
+        double amountDue = 0.0;
+
+        String query = String.format("select * from Lease where lease_id = 400", leaseId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            while(rs.next()){
+                amountDue = rs.getDouble("rate");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        query = String.format("select * from payment where lease_id = 400", leaseId);
+        int i = 0;
+
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nPayment Status");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Payment ID: " + rs.getString("payment_id"));
+                System.out.println("Amount: " + rs.getString("amount"));
+                System.out.println("Type: " + rs.getString("type"));
+                System.out.println();
+
+                amountDue -= rs.getDouble("amount");
+                i++;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        if(i==0){
+            System.out.println("No payments have been made.\n");
+        }
+
+        System.out.println("Amount Due: $" + amountDue);
     }
 
     public static void makeRentalPayment(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
         
+    }
+
+    public static void setMoveOutDate(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+
     }
 
     public static void addPersonPet(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
@@ -303,10 +343,6 @@ public class TenantMenu{
         } while(peopleChoice != 2 && peopleChoice != 1);
     }
 
-    public static void setMoveOutDate(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
-
-    }
-
     public static void viewApartmentData(Connection con, Statement s, Scanner scnr, String tenantId){
         String query = String.format("select * from (select * from (tenant natural join lease natural join apartment)) A inner join property B on A.prop_id=B.prop_id where id='%s'", tenantId);
         try {
@@ -354,7 +390,7 @@ public class TenantMenu{
                 System.out.println("Account: " + rs.getString("account"));
                 System.out.println("Occupation: " + rs.getString("occupation"));
                 System.out.println("Company: " + rs.getString("company"));
-                System.out.println("Salary: " + rs.getString("salary"));
+                System.out.println("Salary: $" + rs.getString("salary"));
                 System.out.println("Number of dependents: " + rs.getString("num_dependent"));
             }
         } catch (SQLException e) {
@@ -612,11 +648,11 @@ public class TenantMenu{
             System.out.println("Error while getting column names. "+ e.getMessage());
         }
 
-        System.out.printf("Current salary: %s\n", salary);
+        System.out.printf("Current salary: $%s\n", salary);
         double newSalary = 0.0;
 
         do{
-            System.out.print("\nEnter new salary: ");
+            System.out.print("\nEnter new salary: $");
             if (!scnr.hasNextDouble()){
                 System.out.println("Please input a number.\n");
                 scnr.next();
