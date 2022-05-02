@@ -208,7 +208,11 @@ public class TenantMenu{
                     updateName(con, s, scnr, tenantId, tenantAttrs.get(choice));
                     break;
                 case 4:
+                    updatePhone(con, s, scnr, tenantId);
+                    break;
                 case 5:
+                    updateEmail(con, s, scnr, tenantId);
+                    break;
                 case 6:
                     updateSSN(con, s, scnr, tenantId);
                     break;
@@ -247,6 +251,83 @@ public class TenantMenu{
                     continue;
             }
         } while(choice != 16);
+    }
+
+    public static void updatePhone(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant natural join customer where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Phone Number");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Phone Number: " + rs.getString("phone"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String phone = "";
+        String regexPhone = "^((\\(\\d{3}\\))|\\d{3})[- .]?\\d{3}[- .]?\\d{4}$";
+
+        scnr.nextLine();
+        do{
+            System.out.print("\nEnter new phone number (or q to exit): ");
+            phone = scnr.nextLine();
+            if(phone.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!phone.matches(regexPhone)){
+                System.out.println("Invalid phone number. Please try again.");
+                continue;
+            }
+        } while(!phone.matches(regexPhone));
+
+        String updateQuery = String.format("update customer set phone='%s' where id='%s'", phone, tenantId);
+        try {
+            s.executeUpdate(updateQuery);
+            System.out.println("Phone Number updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating phone number. "+ e.getMessage());
+        }
+    }
+
+    public static void updateEmail(Connection con, Statement s, Scanner scnr, String tenantId){
+        String query = String.format("select * from tenant natural join customer where id='%s'", tenantId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Email");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current Email: " + rs.getString("email"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+
+        String email = "";
+        String regexEmail = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+
+        do{
+            System.out.print("\nEnter new email (or q to exit): ");
+            email = scnr.next();
+            if(email.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!email.matches(regexEmail)){
+                System.out.println("Invalid Email. Please try again.");
+                continue;
+            }
+        } while(!email.matches(regexEmail));
+
+        String updateQuery = String.format("update customer set email='%s' where id='%s'", email, tenantId);
+        try {
+            s.executeUpdate(updateQuery);
+            System.out.println("Email updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating email. "+ e.getMessage());
+        }
     }
 
     public static void updateName(Connection con, Statement s, Scanner scnr, String tenantId, String attr){
@@ -369,7 +450,7 @@ public class TenantMenu{
         }
 
         String newAccount = "";
-        String ssnAccount = "^[0-9]*$";
+        String regexAccount = "^[0-9]*$";
 
         do{
             System.out.print("\nEnter new account number (or q to exit): ");
@@ -378,11 +459,11 @@ public class TenantMenu{
                 System.out.println("Exiting.");
                 return;
             }
-            if(!newAccount.matches(ssnAccount)){
+            if(!newAccount.matches(regexAccount)){
                 System.out.println("Invalid account number. Please try again.");
                 continue;
             }
-        } while(!newAccount.matches(ssnAccount));
+        } while(!newAccount.matches(regexAccount));
 
         String updateQuery = String.format("update tenant set account='%s' where id='%s'", newAccount, tenantId);
         try {
@@ -642,7 +723,7 @@ public class TenantMenu{
         String ssnRegex = "^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$";
 
         do{
-            System.out.print("\nEnter new SSN (or q to exit): ");
+            System.out.print("\nEnter new SSN in format \"###-##-####\" (or q to exit): ");
             newSSN = scnr.next();
             if(newSSN.equals("q")){
                 System.out.println("Exiting.");
