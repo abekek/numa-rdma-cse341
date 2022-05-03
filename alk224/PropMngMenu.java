@@ -366,8 +366,18 @@ public class PropMngMenu {
             } while(peopleChoice != 2 && peopleChoice != 1);
 
             do {
-                System.out.println("\nPlease enter the rate of the lease:");
-                System.out.print("Enter the rate: ");
+                System.out.println("\nPlease enter the rate of the lease.");
+                query = String.format("select * from apartment natural join property where prop_id='%s' and apt_num='%s'", propertyId, apartmentNum);
+                try{
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    String actualRate = rs.getString("monthly_rent");
+                    System.out.printf("For your information, the listed monthly rent for this apartment is $%s.\n", actualRate);
+                } catch(SQLException e){
+                    System.out.println("Property ID not found.");
+                    continue;
+                }
+                System.out.print("Enter the rate: $");
 
                 // validating entered choice
                 if (!scnr.hasNextDouble()){
@@ -382,7 +392,7 @@ public class PropMngMenu {
 
             do {
                 System.out.println("\nPlease enter the rate of the parking for this lease:");
-                System.out.print("Enter the rate: ");
+                System.out.print("Enter the rate: $");
 
                 // validating entered choice
                 if (!scnr.hasNextDouble()){
