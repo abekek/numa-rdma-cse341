@@ -22,7 +22,7 @@ public class DataGen{
             Statement s = con.createStatement();
         ) { 
             // ------------------------------------------------------------
-            // GENERATING DATA FOR TABLES: PERSON, CUSTOMER, TENANT
+            // GENERATING DATA FOR TABLES: PERSON, CUSTOMER, TENANT, EMPLOYEE
             // ------------------------------------------------------------
             // file = new File("PEOPLE.csv");
             File file = new File("people_data.csv");
@@ -32,6 +32,12 @@ public class DataGen{
             String[] dataPerson;
             int rowNum = 0;
             List<String> tenantIds = new ArrayList<String>();
+
+            for(int e = 0; e < 5; e++){
+                double salaryEmp = Math.random() * (100000 - 10000) + 10000;
+                String queryInsertEmployee = String.format("INSERT INTO EMPLOYEE (salary) VALUES ('%s')", salaryEmp);
+                s.executeQuery(queryInsertEmployee);
+            }
 
             while((line = br.readLine()) != null){
                 ResultSet result;
@@ -93,11 +99,12 @@ public class DataGen{
 
                 String[] paymentTypes = {"CASH", "CHECK", "CREDIT"};
                 double paymentAmount = Math.random()*(50000)+100;
-                String queryInsertPayment = String.format("INSERT INTO PAYMENT VALUES('%s', '%s', '%s')", attributes[3], Double.toString(paymentAmount), paymentTypes[(int)(Math.random()*3)]);
-                s.executeUpdate(queryInsertPayment);
-
-                String queryInsertLease = String.format("INSERT INTO LEASE VALUES ('%s', '%s', '%s', '%s', '', '', '%s', '%s')", attributes[0], tenantIds.get(rowNum), attributes[1], attributes[2], Double.toString(paymentAmount), attributes[3]);
+                double parkingPayment = Math.random()*(1000)+100;
+                String queryInsertLease = String.format("INSERT INTO LEASE VALUES ('%s', '%s', '%s', '%s', '', '', '%s', '%s')", attributes[0], tenantIds.get(rowNum), attributes[1], attributes[2], Double.toString(paymentAmount), Double.toString(parkingPayment));
                 s.executeUpdate(queryInsertLease);
+
+                String queryInsertPayment = String.format("INSERT INTO PAYMENT VALUES('%s', '%s', '%s', '%s')", attributes[3], Double.toString(paymentAmount + parkingPayment), paymentTypes[(int)(Math.random()*3)], attributes[0]);
+                s.executeUpdate(queryInsertPayment);
 
                 if(rowNum%2==0){
                     String queryInsertMbmLease = String.format("INSERT INTO MBM_LEASE VALUES('%s', '%s')", attributes[0], (int)(Math.random()*25+5));
@@ -197,8 +204,8 @@ public class DataGen{
                 if(l < 900){
                     for(int j = 1; j <= numApts; j++){
                         // System.out.printf("%s\n", result.getInt(1));
-                        if(j > numApts * 0.5)
-                            break;
+                        // if(j > numApts * 0.5)
+                        //     break;
                         String monthly_rent = String.format("%.2f", Math.random()*(50000)+400);
                         String security_deposit = String.format("%.2f", Math.random()*(1000)+30);
                         String area = String.format("%.2f", Math.random()*(1000)+10); 
@@ -215,10 +222,37 @@ public class DataGen{
                         // result.next();
 
                         // System.out.printf("%s\n", result.getInt(1));
-                        String queryInsertApartment = String.format("INSERT INTO APARTMENT VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", Integer.toString(j), monthly_rent, security_deposit, area, bdrm_num, bthrm_num, type, attributes[0], leases[l++]);
-                        s.executeQuery(queryInsertApartment);
+                        if(j > numApts * 0.5){
+                            String queryInsertApartment = String.format("INSERT INTO APARTMENT VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '')", Integer.toString(j), monthly_rent, security_deposit, area, bdrm_num, bthrm_num, type, attributes[0]);
+                            s.executeQuery(queryInsertApartment);
+                        }
+                        else{
+                            String queryInsertApartment = String.format("INSERT INTO APARTMENT VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", Integer.toString(j), monthly_rent, security_deposit, area, bdrm_num, bthrm_num, type, attributes[0], leases[l++]);
+                            s.executeQuery(queryInsertApartment);
+                            // System.out.printf("%s\n", result.getInt(1));
+                            numAptsAvailable--;
+                        }
+                    }
+                }
+                else{
+                    for(int j = 1; j <= numApts; j++){
                         // System.out.printf("%s\n", result.getInt(1));
-                        numAptsAvailable--;
+                        // if(j > numApts * 0.5)
+                        //     break;
+                        String monthly_rent = String.format("%.2f", Math.random()*(50000)+400);
+                        String security_deposit = String.format("%.2f", Math.random()*(1000)+30);
+                        String area = String.format("%.2f", Math.random()*(1000)+10); 
+                        String bdrm_num = (int)(Math.random()*(10))+"";
+                        String bthrm_num = (int)(Math.random()*(5)+1)+"";
+                        String type = "";
+                        if(Double.parseDouble(area) >= 500)
+                            type += "penthouse";
+                        if(Integer.parseInt(bdrm_num) == 0)
+                            type += "/" + "studio";
+                        type += "/" + apt_types[(int)(Math.random()*(4))];
+
+                        String queryInsertApartment = String.format("INSERT INTO APARTMENT VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '')", Integer.toString(j), monthly_rent, security_deposit, area, bdrm_num, bthrm_num, type, attributes[0]);
+                        s.executeQuery(queryInsertApartment);
                     }
                 }
 
@@ -246,7 +280,7 @@ public class DataGen{
                         attributesAmnt[k++] = attrAmnt;
                     }
 
-                    String queryInsertAmenity = String.format("INSERT INTO AMENITY VALUES ('%s', '%s', '%s', '%s', '%s', '%s')", attributesAmnt[0], attributesAmnt[1], attributesAmnt[2], attributesAmnt[3], attributesAmnt[4], attributes[0]);
+                    String queryInsertAmenity = String.format("INSERT INTO AMENITY (name, description, floor, available, fee, prop_id) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')", attributesAmnt[0], attributesAmnt[1], attributesAmnt[2], attributesAmnt[3], attributesAmnt[4], attributes[0]);
                     s.executeQuery(queryInsertAmenity);
 
                     amntCounter--;
