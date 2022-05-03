@@ -216,10 +216,10 @@ public class TenantMenu{
         }
     }
 
-    public static void checkPaymentStatus(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+    public static double checkPaymentStatus(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
         double amountDue = 0.0;
 
-        String query = String.format("select * from Lease where lease_id = 400", leaseId);
+        String query = String.format("select * from Lease where lease_id = %s", leaseId);
         try {
             ResultSet rs = s.executeQuery(query);
             while(rs.next()){
@@ -230,7 +230,7 @@ public class TenantMenu{
             System.out.println("Error while getting column names. "+ e.getMessage());
         }
 
-        query = String.format("select * from payment where lease_id = 400", leaseId);
+        query = String.format("select * from payment where lease_id = %s", leaseId);
         int i = 0;
 
         try {
@@ -255,10 +255,81 @@ public class TenantMenu{
         }
 
         System.out.println("Amount Due: $" + amountDue);
+        return amountDue;
     }
 
     public static void makeRentalPayment(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
-        
+        String query = String.format("select * from Lease where lease_id = %s", leaseId);
+        double amountDue = checkPaymentStatus(con, s, scnr, tenantId, leaseId);
+
+        if(amountDue <= 0.0){
+            System.out.println("No payments are due.\n");
+            return;
+        }
+
+        System.out.println("\nMake Rental Payment");
+        System.out.println("====================");
+        System.out.println("Amount Due: $" + amountDue);
+
+        double amountPaid = 0.0;
+
+        do{
+            System.out.print("\nEnter amount you want to pay: $");
+            if (!scnr.hasNextDouble()){
+                System.out.println("Please input a number.\n");
+                scnr.next();
+                continue;
+            } else {
+                amountPaid = scnr.nextDouble();
+                break;
+            }
+        } while(true);
+
+        int type = -1;
+        String typeString = "";
+
+        do{
+            System.out.println("\nChoose a payment type");
+            System.out.println("1. Cash");
+            System.out.println("2. Check");
+            System.out.println("3. Credit Card");
+            System.out.println("4. Exit");
+            System.out.print("Enter your choice: ");
+
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                type = scnr.nextInt();
+            }
+
+            switch(type){
+                case 1:
+                    typeString = "CASH";
+                    break;
+                case 2:
+                    typeString = "CHECK";
+                    break;
+                case 3:
+                    typeString = "CREDIT";
+                    break;
+                case 4:
+                    System.out.println("Exiting to tenant menu.");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(type != 4 && type != 1 && type != 2 && type != 3);
+
+        query = String.format("insert into payment (amount, type, lease_id) values('%s', '%s', '%s')", Double.toString(amountPaid), typeString, leaseId);
+        try {
+            s.executeUpdate(query);
+            System.out.println("Payment made successfully.\n");
+        } catch (SQLException e) {
+            System.out.println("Error while inserting into payment table. "+ e.getMessage());
+        }
     }
 
     public static void setMoveOutDate(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
@@ -315,6 +386,7 @@ public class TenantMenu{
         query = String.format("update lease set move_out_date = '%s' where lease_id = %s", newMoveOutDate, leaseId);
         try {
             s.executeUpdate(query);
+            System.out.println("Move-out date updated successfully.\n");
         } catch (SQLException e) {
             System.out.println("Error while getting column names. "+ e.getMessage());
         }
@@ -349,6 +421,7 @@ public class TenantMenu{
                     try{
                         query = String.format("update lease set pet = '%s' where lease_id = '%s'", pet, leaseId);
                         s.executeUpdate(query);
+                        System.out.println("Pet added successfully.\n");
                     } catch(SQLException e){
                         System.out.println("Error: " + e);
                         continue;
@@ -386,6 +459,7 @@ public class TenantMenu{
                     try{
                         query = String.format("update lease set people = '%s' where lease_id = '%s'", people, leaseId);
                         s.executeUpdate(query);
+                        System.out.println("People added successfully.\n");
                     } catch(SQLException e){
                         System.out.println("Error: " + e);
                         continue;
