@@ -207,7 +207,8 @@ public class TenantMenu{
                 System.out.println("Pets: " + rs.getString("pet"));
                 System.out.println("People: " + rs.getString("people"));
                 System.out.println("Move-out date: " + rs.getString("move_out_date"));
-                System.out.println("Rate: " + rs.getString("rate"));
+                System.out.println("Rate: $" + rs.getString("rate"));
+                System.out.println("Parking Rate: $" + rs.getString("parking_rate"));
                 System.out.println();
             }
         } catch (SQLException e) {
@@ -223,6 +224,7 @@ public class TenantMenu{
             ResultSet rs = s.executeQuery(query);
             while(rs.next()){
                 amountDue = rs.getDouble("rate");
+                amountDue += rs.getDouble("parking_rate");
             }
         } catch (SQLException e) {
             System.out.println("Error while getting column names. "+ e.getMessage());
@@ -237,7 +239,7 @@ public class TenantMenu{
             System.out.println("====================");
             while(rs.next()){
                 System.out.println("Payment ID: " + rs.getString("payment_id"));
-                System.out.println("Amount: " + rs.getString("amount"));
+                System.out.println("Amount: $" + rs.getString("amount"));
                 System.out.println("Type: " + rs.getString("type"));
                 System.out.println();
 
@@ -260,7 +262,62 @@ public class TenantMenu{
     }
 
     public static void setMoveOutDate(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
+        String query = String.format("select * from lease where lease_id = %s", leaseId);
+        String moveOutDate = "";
+        try {
+            ResultSet rs = s.executeQuery(query);
+            while(rs.next()){
+                moveOutDate = rs.getString("move_out_date");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
 
+        System.out.println("\nCurrent Move-out Date: " + moveOutDate);
+
+        boolean dateIsIncorrect = true;
+        String month = "";
+        String day = "";
+        String year = "";
+        
+        do{
+            System.out.println("\nPlease enter the new Move-Out date.");
+            try{
+                System.out.print("Enter the month: ");
+                month = scnr.next();
+                if(Integer.parseInt(month) < 1 || Integer.parseInt(month) > 12){
+                    System.out.println("Invalid month. Please try again.\n");
+                    continue;
+                }
+                System.out.print("Enter the day: ");
+                day = scnr.next();
+                // TODO: check for February/leap year
+                if(Integer.parseInt(day) < 1 || Integer.parseInt(day) > 31){
+                    System.out.println("Invalid day. Please try again.\n");
+                    continue;
+                }
+                System.out.print("Enter the year: ");
+                year = scnr.next();
+                if(Integer.parseInt(year) < 2022){
+                    System.out.println("Invalid year. Please try again.\n");
+                    continue;
+                }
+                dateIsIncorrect = false;
+            } catch(Exception e){
+                System.out.println("Please enter a valid date.\n");
+                continue;
+            }
+            
+        } while(dateIsIncorrect);
+
+        String newMoveOutDate = month + "/" + day + "/" + year;
+
+        query = String.format("update lease set move_out_date = '%s' where lease_id = %s", newMoveOutDate, leaseId);
+        try {
+            s.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
     }
 
     public static void addPersonPet(Connection con, Statement s, Scanner scnr, String tenantId, String leaseId){
@@ -351,13 +408,13 @@ public class TenantMenu{
             System.out.println("====================");
             while(rs.next()){
                 System.out.println("Property Name: " + rs.getString("name"));
-                System.out.println("Property Address: " + rs.getString(28));
-                System.out.println("Property State: " + rs.getString(29));
-                System.out.println("Property City: " + rs.getString(30));
+                System.out.println("Property Address: " + rs.getString(29));
+                System.out.println("Property State: " + rs.getString(30));
+                System.out.println("Property City: " + rs.getString(31));
                 System.out.println("Lease ID: " + rs.getString("lease_id"));
                 System.out.println("Apartment Number: " + rs.getString("apt_num"));
-                System.out.println("Monthly Rent: " + rs.getString("monthly_rent"));
-                System.out.println("Security Deposit: " + rs.getString("security_dep"));
+                System.out.println("Monthly Rent: $" + rs.getString("monthly_rent"));
+                System.out.println("Security Deposit: $" + rs.getString("security_dep"));
                 System.out.println("Area: " + rs.getString("area"));
                 System.out.println("Bedrooms Number: " + rs.getString("bdrm_num"));
                 System.out.println("Bathrooms Number: " + rs.getString("bthrm_num"));

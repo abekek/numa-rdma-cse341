@@ -178,6 +178,7 @@ public class PropMngMenu {
         String pet = "";
         String people = "";
         Double rate = 0.0;
+        Double parkingRate = 0.0;
         String propertyId = "";
         String apartmentNum = "";
 
@@ -380,6 +381,21 @@ public class PropMngMenu {
             } while(true);
 
             do {
+                System.out.println("\nPlease enter the rate of the parking for this lease:");
+                System.out.print("Enter the rate: ");
+
+                // validating entered choice
+                if (!scnr.hasNextDouble()){
+                    System.out.println("Please input a double.\n");
+                    scnr.next();
+                    continue;
+                } else {
+                    parkingRate = scnr.nextDouble();
+                    break;
+                }
+            } while(true);
+
+            do {
                 System.out.println("\nPlease choose the type of lease: ");
                 System.out.println("1. Month-by-Month Lease");
                 System.out.println("2. Fixed Lease");
@@ -399,7 +415,7 @@ public class PropMngMenu {
     
             switch(choice){
                 case 1:
-                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate));
+                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate), Double.toString(parkingRate));
                     s.executeUpdate(query);
                     recordMbmLease(con, s, scnr, newLeaseId);
                     query = String.format("update apartment set lease_id='%s' where prop_id='%s' and apt_num='%s'", newLeaseId, propertyId, apartmentNum);
@@ -407,7 +423,7 @@ public class PropMngMenu {
                     System.out.println("\nLease successfully recorded.\n");
                     break;
                 case 2:
-                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate));
+                    query = String.format("insert into lease values('%s', '%s', '%s', '%s', '%s', '', '%s', '%s')", newLeaseId, tenantId, dateSigned, pet, people, Double.toString(rate), Double.toString(parkingRate));
                     s.executeUpdate(query);
                     recordFixedLease(con, s, scnr, newLeaseId);
                     query = String.format("update apartment set lease_id='%s' where prop_id='%s' and apt_num='%s'", newLeaseId, propertyId, apartmentNum);
