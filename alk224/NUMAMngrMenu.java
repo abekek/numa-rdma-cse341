@@ -93,20 +93,6 @@ public class NUMAMngrMenu {
                     }
                 } while(numAmenities <= 0);
 
-                System.out.println("\nHow many floors would the property have?");
-                int numFloors = -1;
-                do{
-                    System.out.print("Enter the number of floors: ");
-                    if (!scnr.hasNextInt()){
-                        System.out.println("Please input an integer.\n");
-                        scnr.next();
-                        continue;
-                    } else {
-                        numFloors = scnr.nextInt();
-                        break;
-                    }
-                } while(numFloors <= 0);
-
                 System.out.println("\nWhat is the minimum rent of the apartment?");
                 int minRent = -1;
                 do{
@@ -247,6 +233,48 @@ public class NUMAMngrMenu {
                     }
                 } while(maxArea <= 0);
 
+                System.out.println("\nHow many floors would the property have?");
+                int numFloors = -1;
+                do{
+                    System.out.print("Enter the number of floors: ");
+                    if (!scnr.hasNextInt()){
+                        System.out.println("Please input an integer.\n");
+                        scnr.next();
+                        continue;
+                    } else {
+                        numFloors = scnr.nextInt();
+                        break;
+                    }
+                } while(numFloors <= 0);
+
+                System.out.println("\nWhat is the minimum fee for the amenities?");
+                int minFee = -1;
+                do{
+                    System.out.print("Enter the minimum fee: $");
+                    if (!scnr.hasNextInt()){
+                        System.out.println("Please input an integer.\n");
+                        scnr.next();
+                        continue;
+                    } else {
+                        minFee = scnr.nextInt();
+                        break;
+                    }
+                } while(minFee <= 0);
+
+                System.out.println("\nWhat is the maximum fee for the amenities?");
+                int maxFee = -1;
+                do{
+                    System.out.print("Enter the maximum fee: $");
+                    if (!scnr.hasNextInt()){
+                        System.out.println("Please input an integer.\n");
+                        scnr.next();
+                        continue;
+                    } else {
+                        maxFee = scnr.nextInt();
+                        break;
+                    }
+                } while(maxFee <= 0);
+
                 query = "select distinct get_max_prop_id() from property";
                 ResultSet rs = s.executeQuery(query);
                 rs.next();
@@ -272,9 +300,23 @@ public class NUMAMngrMenu {
                 cs.setInt(10, minBathrooms);
                 cs.setInt(11, maxBathrooms);
                 cs.execute();
-                // query = String.format("execute populate_apartments('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", prop_id, minRent, maxRent, minDeposit, maxDeposit, minArea, maxArea, minBedrooms, maxBedrooms, minBathrooms, maxBathrooms);
-                // s.executeQuery(query);
                 System.out.println("\nApartments have been randomly populated.\n");
+
+                query = String.format("select distinct get_max_amnt_id() from amenity");
+                rs = s.executeQuery(query);
+                rs.next();
+                int amnt_id = rs.getInt(1) + 1;
+
+                cs = con.prepareCall("{call populate_amenities(?, ?, ?, ?, ?)}");
+                cs.setInt(1, amnt_id);
+                cs.setInt(2, numFloors);
+                cs.setInt(3, minFee);
+                cs.setInt(4, maxFee);
+                cs.setInt(5, prop_id);
+                cs.execute();
+                System.out.println("Amenities have been randomly populated.\n");
+
+                cs.close();
             } catch(SQLException e){
                 System.out.println("\nError adding property/populating apartments." + e.getMessage());
             }
