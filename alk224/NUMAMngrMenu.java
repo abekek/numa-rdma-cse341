@@ -35,13 +35,22 @@ public class NUMAMngrMenu {
                 case 3:
                     String propertyId = "";
                     String query = "";
+
+                    ResultSet rs = s.executeQuery("select count(*) from property");
+                    rs.next();
+                    int numProperties = rs.getInt(1);
+
+                    query = String.format("select distinct get_min_prop_id() from property");
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    String min_propertyId = rs.getString(1);
             
                     do{
-                        System.out.print("\nPlease enter the property ID: ");
+                        System.out.printf("\nPlease enter the property ID (Hint: there are %d properties starting with index %s): ", numProperties, min_propertyId);
                         propertyId = scnr.next();
                         try{
                             query = String.format("select * from property where prop_id='%s'", propertyId);
-                            ResultSet rs = s.executeQuery(query);
+                            rs = s.executeQuery(query);
                             rs.next();
                             rs.getString("prop_id");
                         } catch(SQLException e){

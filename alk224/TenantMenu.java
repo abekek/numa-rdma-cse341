@@ -2,6 +2,8 @@ import java.util.Scanner;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 public class TenantMenu{
     public static void startMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
@@ -40,15 +42,116 @@ public class TenantMenu{
         } while(choice != 3);
     }
 
+    // Reference: https://www.baeldung.com/sha-256-hashing-java
+    public static String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if(hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
     public static void loginTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
         // TODO: implement login
+        int choice = -1;
+        String tenantId = "";
+        String password = "";
+        String query = "";
+        System.out.println("\nLogin to your account.");
+        do {
+            System.out.print("Enter your tenant ID (q to quit): ");
+            tenantId = scnr.next();
+
+            if (tenantId.equals("q")) {
+                System.out.println("Exiting to main menu.");
+                break;
+            }
+
+            try{
+                query = String.format("select * from tenant where id = '%s'", tenantId);
+                ResultSet rs = s.executeQuery(query);
+                rs.next();
+                rs.getString("SSN");
+                do{
+                    System.out.printf("Enter your password for tenant with ID=%s (or q to exit). (Hint: all starting users have a password of qwerty12345): ", tenantId);
+                    password = scnr.next();
+                    if(password.equals("q")){
+                        System.out.println("Exiting to main menu.");
+                        return;
+                    }
+                    
+                    String hexPassword = "";
+                    try{
+                        MessageDigest md = MessageDigest.getInstance("SHA-256");
+                        byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
+                        hexPassword = bytesToHex(hash);
+                    } catch(Exception e){
+                        System.out.println("Error: " + e.getMessage());
+                    }
+
+                    query = String.format("select * from tenant where id = '%s'", tenantId);
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    if(hexPassword.equals(rs.getString("password"))){
+                        System.out.println("Login successful.\n");
+                        startLoggedTenantMenu(con, s, scnr, tenantId);
+                        break;
+                    } else {
+                        System.out.println("Password is incorrect. Try again.\n");
+                        continue;
+                    }
+                } while(!password.equals("q"));
+            } catch(SQLException e){
+                System.out.println("Tenant ID not found.\n");
+                do {
+                    System.out.println("Do you want to register, or try again?");
+                    System.out.println("1. Register");
+                    System.out.println("2. Try again");
+                    System.out.println("3. Exit");
+                    System.out.print("Enter your choice: ");
+
+                    // validating entered choice
+                    if (!scnr.hasNextInt()){
+                        System.out.println("Please input an integer.\n");
+                        scnr.next();
+                        continue;
+                    } else {
+                        choice = scnr.nextInt();
+                    }
+
+                    switch(choice){
+                        case 1:
+                            registerTenant(con, s, scnr);
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            System.out.println("Exiting to main menu.");
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please try again.\n");
+                            continue;
+                    }
+                } while(choice != 1 && choice != 2 && choice != 3);
+
+                if(choice == 2){
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        } while(true);
     }
 
     public static void registerTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
         // TODO: implement registration
     }
 
-    public static void startOldTenantMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
+    public static void startLoggedTenantMenu(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{
         int choice = -1;
         
         do{
@@ -71,16 +174,16 @@ public class TenantMenu{
 
             switch(choice){
                 case 1:
-                    viewPersonalData(con, s, scnr, "1");
+                    viewPersonalData(con, s, scnr, tenantId);
                     break;
                 case 2:
-                    viewApartmentData(con, s, scnr, "1");
+                    viewApartmentData(con, s, scnr, tenantId);
                     break;
                 case 3:
-                    updatePersonalData(con, s, scnr, "1");
+                    updatePersonalData(con, s, scnr, tenantId);
                     break;
                 case 4:
-                    leaseActions(con, s, scnr, "1");
+                    leaseActions(con, s, scnr, tenantId);
                     break;
                 case 5:
                     System.out.println("Exiting to tenant menu.");
@@ -354,20 +457,20 @@ public class TenantMenu{
         do{
             System.out.println("\nPlease enter the new Move-Out date.");
             try{
-                System.out.print("Enter the month: ");
+                System.out.print("Enter the month (MM): ");
                 month = scnr.next();
                 if(Integer.parseInt(month) < 1 || Integer.parseInt(month) > 12){
                     System.out.println("Invalid month. Please try again.\n");
                     continue;
                 }
-                System.out.print("Enter the day: ");
+                System.out.print("Enter the day (DD): ");
                 day = scnr.next();
                 // TODO: check for February/leap year
                 if(Integer.parseInt(day) < 1 || Integer.parseInt(day) > 31){
                     System.out.println("Invalid day. Please try again.\n");
                     continue;
                 }
-                System.out.print("Enter the year: ");
+                System.out.print("Enter the year (YYYY). Start with 2022: ");
                 year = scnr.next();
                 if(Integer.parseInt(year) < 2022){
                     System.out.println("Invalid year. Please try again.\n");
@@ -482,9 +585,9 @@ public class TenantMenu{
             System.out.println("====================");
             while(rs.next()){
                 System.out.println("Property Name: " + rs.getString("name"));
-                System.out.println("Property Address: " + rs.getString(29));
-                System.out.println("Property State: " + rs.getString(30));
-                System.out.println("Property City: " + rs.getString(31));
+                System.out.println("Property Address: " + rs.getString(30));
+                System.out.println("Property State: " + rs.getString(31));
+                System.out.println("Property City: " + rs.getString(32));
                 System.out.println("Lease ID: " + rs.getString("lease_id"));
                 System.out.println("Apartment Number: " + rs.getString("apt_num"));
                 System.out.println("Monthly Rent: $" + rs.getString("monthly_rent"));

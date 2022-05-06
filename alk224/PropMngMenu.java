@@ -243,8 +243,17 @@ public class PropMngMenu {
             String day = "";
             String year = "";
 
+            rs = s.executeQuery("select count(*) from property");
+            rs.next();
+            int numProperties = rs.getInt(1);
+
+            query = String.format("select distinct get_min_prop_id() from property");
+            rs = s.executeQuery(query);
+            rs.next();
+            String min_propertyId = rs.getString(1);
+
             do{
-                System.out.print("\nPlease enter the property ID: ");
+                System.out.printf("\nPlease enter the property ID (Hint: there are %d properties starting with index %s): ", numProperties, min_propertyId);
                 propertyId = scnr.next();
                 try{
                     query = String.format("select * from property where prop_id='%s'", propertyId);
@@ -255,7 +264,13 @@ public class PropMngMenu {
                     System.out.println("Property ID not found.");
                     continue;
                 }
-                System.out.print("Please enter the apartment number: ");
+
+                query = String.format("select count(*) from apartment where prop_id='%s'", propertyId);
+                rs = s.executeQuery(query);
+                rs.next();
+                int numApartments = rs.getInt(1);
+
+                System.out.printf("Please enter the apartment number (Hint: there are %d apartments in this property): ", numApartments);
                 apartmentNum = scnr.next();
                 try{
                     query = String.format("select * from apartment where prop_id='%s' and apt_num='%s'", propertyId, apartmentNum);
@@ -276,20 +291,20 @@ public class PropMngMenu {
             do{
                 System.out.println("\nPlease enter the date lease was signed:");
                 try{
-                    System.out.print("Enter the month: ");
+                    System.out.print("Enter the month (MM): ");
                     month = scnr.next();
                     if(Integer.parseInt(month) < 1 || Integer.parseInt(month) > 12){
                         System.out.println("Invalid month. Please try again.\n");
                         continue;
                     }
-                    System.out.print("Enter the day: ");
+                    System.out.print("Enter the day (DD): ");
                     day = scnr.next();
                     // TODO: check for February/leap year
                     if(Integer.parseInt(day) < 1 || Integer.parseInt(day) > 31){
                         System.out.println("Invalid day. Please try again.\n");
                         continue;
                     }
-                    System.out.print("Enter the year: ");
+                    System.out.print("Enter the year (YYYY). Start with 2021: ");
                     year = scnr.next();
                     if(Integer.parseInt(year) < 2020 || Integer.parseInt(year) > 2022){
                         System.out.println("Invalid year. Please try again.\n");
