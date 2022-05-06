@@ -287,12 +287,12 @@ public class NUMAMngrMenu {
         String query = "select * from property";
         try {
             ResultSet rs = s.executeQuery(query);
-            System.out.println("\nView Property");
-            System.out.println("====================");
-            System.out.println("Property ID\tName\tAddress\tState\tCity\tTotal Apartments\tAvailable Apartments\tAvailable Amenities");
-            System.out.println("===============================================================");
+            System.out.println("\nProperties Table");
+            System.out.println("==================");
+            System.out.println("Property ID\tName\t\tAddress\t\t\t\tState\t\tCity\t\t\tTotal Apartments\tAvailable Apartments\tAvailable Amenities");
+            System.out.println("===========================================================================================================================================================================");
             while(rs.next()){
-                System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", rs.getString("prop_id"), rs.getString("name"), rs.getString("address"), rs.getString("state"), rs.getString("city"), rs.getString("apt_total"), rs.getString("apt_available"), rs.getString("amnt_available"));
+                System.out.printf("%-10s\t%-10s\t%-30s\t%-10s\t%-20s\t%-20s\t%-20s\t%s\n", rs.getString("prop_id"), rs.getString("name"), rs.getString("address"), rs.getString("state"), rs.getString("city"), rs.getString("apt_total"), rs.getString("apt_available"), rs.getString("amnt_available"));
             }
         } catch (SQLException e) {
             System.out.println("Error while getting column names. "+ e.getMessage());

@@ -56,7 +56,6 @@ public class TenantMenu{
     }
 
     public static void loginTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
-        // TODO: implement login
         int choice = -1;
         String tenantId = "";
         String password = "";
@@ -148,7 +147,79 @@ public class TenantMenu{
     }
 
     public static void registerTenant(Connection con, Statement s, Scanner scnr) throws SQLException{
-        // TODO: implement registration
+        System.out.println("\nRegister as a new tenant.");
+        String password = "";
+        String query = "";
+
+        String SSN = "";
+        String ssnRegex = "^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$";
+
+        do{
+            System.out.print("\nEnter your SSN in format \"###-##-####\" (or q to exit): ");
+            SSN = scnr.next();
+            if(SSN.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!SSN.matches(ssnRegex)){
+                System.out.println("Invalid SSN. Please try again.");
+                continue;
+            }
+        } while(!SSN.matches(ssnRegex));
+
+        String confirmPassword = "";
+
+        do{
+            System.out.printf("Enter a new password for tenant with SSN=%s (or q to exit): ", SSN);
+            password = scnr.next();
+            if(password.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(password.length() < 8){
+                System.out.println("Password must be at least 8 characters long. Please try again.");
+                continue;
+            }
+            System.out.printf("Confirm password for tenant with SSN=%s (or q to exit): ", SSN);
+            confirmPassword = scnr.next();
+            if(confirmPassword.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!password.equals(confirmPassword)){
+                System.out.println("Passwords do not match. Please try again.");
+                continue;
+            }
+        } while(!password.equals(confirmPassword));
+
+        String hexPassword = "";
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
+            hexPassword = bytesToHex(hash);
+        } catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        int maxId = -1;
+
+        query = String.format("select distinct get_max_id() from tenant");
+        try{
+            ResultSet rs = s.executeQuery(query);
+            rs.next();
+            maxId = rs.getInt(1);
+
+            query = String.format("insert into tenant(id, ssn, password) values('%s', '%s', '%s')", Integer.toString(maxId + 1), SSN, hexPassword);
+            s.executeUpdate(query);
+            query = String.format("insert into customer(id) values('%s')", Integer.toString(maxId + 1));
+            s.executeUpdate(query);
+            query = String.format("insert into person(id) values('%s')", Integer.toString(maxId + 1));
+            s.executeUpdate(query);
+            System.out.printf("\nTenant registered successfully. Your tenant ID is %s\n", Integer.toString(maxId + 1));
+            startLoggedTenantMenu(con, s, scnr, Integer.toString(maxId + 1));
+        } catch(SQLException e){
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     public static void startLoggedTenantMenu(Connection con, Statement s, Scanner scnr, String tenantId) throws SQLException{

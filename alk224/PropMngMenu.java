@@ -2,6 +2,8 @@ import java.util.Scanner;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 public class PropMngMenu {
     public static void startMenu(Connection con, Statement s, Scanner scnr) throws SQLException{
@@ -160,12 +162,51 @@ public class PropMngMenu {
     }
 
     public static void addTenant(Connection con, Statement s, Scanner scnr, String tenantId){
-        String query = String.format("insert into tenant (id) values ('%s')", tenantId);
+        String tenantPassword = "";
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest("qwerty12345".getBytes(StandardCharsets.UTF_8));
+            tenantPassword = TenantMenu.bytesToHex(hash);
+        } catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        String query = String.format("insert into tenant (id, password) values ('%s', '%s')", tenantId, tenantPassword);
         try{
             s.executeQuery(query);
             System.out.println("\nTenant added successfully.");
         } catch(SQLException e){
             System.out.println("Error: " + e.getMessage());
+        }
+
+        try{
+            query = String.format("select * from customer where id='%s'", tenantId);
+            ResultSet rs = s.executeQuery(query);
+            rs.next();
+            rs.getString("phone");
+        } catch(SQLException e){
+            query = String.format("insert into customer (id) values ('%s')", tenantId);
+            try{
+                s.executeQuery(query);
+                System.out.println("Customer added successfully.");
+            } catch(SQLException e2){
+                System.out.println("Error: " + e2.getMessage());
+            }
+        }
+
+        try{
+            query = String.format("select * from person where id='%s'", tenantId);
+            ResultSet rs = s.executeQuery(query);
+            rs.next();
+            rs.getString("last_name");
+        } catch(SQLException e){
+            query = String.format("insert into person (id) values ('%s')", tenantId);
+            try{
+                s.executeQuery(query);
+                System.out.println("Person added successfully.");
+            } catch(SQLException e2){
+                System.out.println("Error: " + e2.getMessage());
+            }
         }
     }
     
