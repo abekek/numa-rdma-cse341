@@ -33,7 +33,25 @@ public class NUMAMngrMenu {
                     removeProperty(con, s, scnr);
                     break;
                 case 3:
-                    editProperty(con, s, scnr);
+                    String propertyId = "";
+                    String query = "";
+            
+                    do{
+                        System.out.print("\nPlease enter the property ID: ");
+                        propertyId = scnr.next();
+                        try{
+                            query = String.format("select * from property where prop_id='%s'", propertyId);
+                            ResultSet rs = s.executeQuery(query);
+                            rs.next();
+                            rs.getString("prop_id");
+                        } catch(SQLException e){
+                            System.out.println("Property ID not found.");
+                            continue;
+                        }
+                        break;
+                    } while(true);
+
+                    editProperty(con, s, scnr, propertyId);
                     break;
                 case 4:
                     viewProperty(con, s, scnr);
@@ -48,13 +66,229 @@ public class NUMAMngrMenu {
         } while(choice != 5);
     }
 
-    public static void editProperty(Connection con, Statement s, Scanner scnr){
+    public static void editProperty(Connection con, Statement s, Scanner scnr, String propertyId){
+        int choice = -1;
+        do{
+            System.out.println("\nWhat would you like to edit?");
+            System.out.println("1. Property Name");
+            System.out.println("2. Property Address");
+            System.out.println("3. Property City");
+            System.out.println("4. Property State");
+            System.out.println("5. Exit");
 
+            System.out.print("Enter your choice: ");
+
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choice = scnr.nextInt();
+            }
+
+            switch(choice){
+                case 1:
+                    editPropertyName(con, s, scnr, propertyId);
+                    break;
+                case 2:
+                    editPropertyAddress(con, s, scnr, propertyId);
+                    break;
+                case 3:
+                    editPropertyCity(con, s, scnr, propertyId);
+                    break;
+                case 4:
+                    editPropertyState(con, s, scnr, propertyId);
+                    break;
+                case 5:
+                    System.out.println("Exiting to main menu.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.\n");
+                    continue;
+            }
+        } while(choice != 5);
+    }
+
+    public static void editPropertyCity(Connection con, Statement s, Scanner scnr, String propertyId){
+        String query = String.format("select * from property where prop_id='%s'", propertyId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate City");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current City: " + rs.getString("city"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+        
+        String city = "";
+        System.out.print("\nPlease enter the city (or q to exit): ");
+        scnr.nextLine();
+        city = scnr.nextLine();
+
+        if(city.equals("q")){
+            return;
+        }
+
+        query = "update property set city=? where prop_id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, city);
+            ps.setString(2, propertyId);
+            ps.executeUpdate();
+            System.out.println("City updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating city. "+ e.getMessage());
+        }
+    }
+
+    public static void editPropertyState(Connection con, Statement s, Scanner scnr, String propertyId){
+        String query = String.format("select * from property where prop_id='%s'", propertyId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate State");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current State: " + rs.getString("state"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+        
+        String[] states = {"AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC",  
+        "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA",  
+        "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE",  
+        "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC",  
+        "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY"};
+
+        int choiceState = -1;
+        do {
+            System.out.println("\nPlease, choose your state.");
+            int i = 0;
+            for(String state : states){
+                System.out.printf("%d. %s\n", i+1, state);
+                i++;
+            }
+            System.out.printf("%d. Exit\n", states.length+1);
+
+            System.out.print("Enter your choice: ");
+            
+            // validating entered choice
+            if (!scnr.hasNextInt()){
+                System.out.println("Please input an integer.\n");
+                scnr.next();
+                continue;
+            } else {
+                choiceState = scnr.nextInt();
+            }
+
+            if(choiceState > states.length+1 || choiceState < 1){
+                System.out.println("Invalid choice. Please try again.\n");
+                continue;
+            }
+
+            if(choiceState == states.length+1){
+                System.out.println("Exiting to menu.");
+                break;
+            }
+
+            String state = states[choiceState-1];
+            query = String.format("update property set state='%s' where prop_id='%s'", state, propertyId);
+            try {
+                s.executeUpdate(query);
+                System.out.println("State updated successfully.");
+                break;
+            } catch (SQLException e) {
+                System.out.println("Error while updating state. "+ e.getMessage());
+            }
+        } while(choiceState != states.length+1);
+    }
+
+    public static void editPropertyName(Connection con, Statement s, Scanner scnr, String propertyId){
+        String query = String.format("select * from property where prop_id='%s'", propertyId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Property Name");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current name: " + rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+        
+        String name = "";
+        System.out.print("\nPlease enter the property name (or q to exit): ");
+        scnr.nextLine();
+        name = scnr.nextLine();
+
+        if(name.equals("q")){
+            return;
+        }
+
+        query = "update property set name=? where prop_id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
+            ps.setString(2, propertyId);
+            ps.executeUpdate();
+            System.out.println("Name updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating name. "+ e.getMessage());
+        }
+    }
+
+    public static void editPropertyAddress(Connection con, Statement s, Scanner scnr, String propertyId){
+        String query = String.format("select * from property where prop_id='%s'", propertyId);
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nUpdate Address");
+            System.out.println("====================");
+            while(rs.next()){
+                System.out.println("Current address: " + rs.getString("address"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+        
+        String address = "";
+        System.out.print("\nPlease enter the address (or q to exit): ");
+        scnr.nextLine();
+        address = scnr.nextLine();
+
+        if(address.equals("q")){
+            return;
+        }
+
+        query = "update property set address=? where prop_id=?";
+        try {
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, address);
+            ps.setString(2, propertyId);
+            ps.executeUpdate();
+            System.out.println("Address updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error while updating address. "+ e.getMessage());
+        }
     }
 
     public static void viewProperty(Connection con, Statement s, Scanner scnr){
-
-    }
+        String query = "select * from property";
+        try {
+            ResultSet rs = s.executeQuery(query);
+            System.out.println("\nView Property");
+            System.out.println("====================");
+            System.out.println("Property ID\tName\tAddress\tState\tCity\tTotal Apartments\tAvailable Apartments\tAvailable Amenities");
+            System.out.println("===============================================================");
+            while(rs.next()){
+                System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", rs.getString("prop_id"), rs.getString("name"), rs.getString("address"), rs.getString("state"), rs.getString("city"), rs.getString("apt_total"), rs.getString("apt_available"), rs.getString("amnt_available"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while getting column names. "+ e.getMessage());
+        }
+    } 
 
     public static void addProperty(Connection con, Statement s, Scanner scnr){
         System.out.println("\nAdding a New Property");

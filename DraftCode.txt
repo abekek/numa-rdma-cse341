@@ -75,3 +75,33 @@ begin
 end;
 
 execute populate_apartments('102', '23', '45', '234', '3454', '232', '2435', '3243', '4545', '354', '45454')
+
+create or replace procedure view_all_properties is
+
+cursor prop is
+    select prop_id, name, address, state, city, apt_total, apt_available, amnt_available
+    from property;
+
+pid  property.prop_id%type;
+n property.name%type;
+a property.address%type;
+s property.state%type;
+c property.city%type;
+apt_t property.apt_total%type;
+apt_av property.apt_available%type;
+amnt_av property.amnt_available%type;
+
+begin
+    open prop;
+    fetch prop into pid, n, a, s, c, apt_t, apt_av, amnt_av;
+    if prop%notfound then
+        dbms_output.put_line('No properties found');
+    else
+        dbms_output.put_line('Property ID ' || ' Name ' || ' Address ' || ' State ' || ' City ' || ' Total Apartments ' || ' Available Apartments ' || ' Available Amenities ');
+        dbms_output.put_line('--------- ' || ' -------- ' || ' ---- ' || ' ---------- ' || ' -------- ' || ' -------- ' || ' -------- ' || ' -------- ' || ' -------- ');
+        while prop%found
+        loop
+            dbms_output.put_line(rpad(pid, 10, ' ') || ' ' || rpad(n, 10, ' ') || ' ' || rpad(a, 10, ' ') || ' ' || rpad(s, 10, ' ') || ' ' || rpad(c, 10, ' ') || ' ' || rpad(apt_t, 10, ' ') || ' ' || rpad(apt_av, 10, ' ') || ' ' || rpad(amnt_av, 10, ' ') );
+        end loop;
+    end if;
+end;
