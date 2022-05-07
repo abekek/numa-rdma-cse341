@@ -1,0 +1,31 @@
+create or replace procedure populate_amenities(in_amnt_id in amenity.amnt_id%type,
+                                               in_floors in amenity.floor%type,
+                                               in_min_fee in amenity.fee%type,
+                                               in_max_fee in amenity.fee%type,
+                                               in_prop_id in amenity.prop_id%type) is
+cursor prop is
+    select prop_id, amnt_available from property
+    where prop_id=in_prop_id;
+
+pid  property.prop_id%type;
+amnt_total property.amnt_available%type;
+floor_amnt amenity.floor%type;
+fee amenity.fee%type;
+amnt_name amenity.name%type;
+amnt_names amntarray;
+
+begin
+    amnt_names := amntarray('Game Room', 'Gym', 'Laundry', 'Conference Room', 'Bar');
+    open prop;
+    fetch prop into pid, amnt_total;
+    if prop%found then
+        amnt_total := amnt_total + in_amnt_id;
+        for counter in in_amnt_id .. amnt_total
+        loop
+            fee := dbms_random.value(in_min_fee, in_max_fee);
+            floor_amnt := dbms_random.value(1, in_floors + 1);
+            amnt_name := amnt_names(trunc(dbms_random.value(1,6))); 
+            insert into amenity values (counter, amnt_name, 'No description', floor_amnt, 'true', fee, pid);
+        end loop;
+    end if;
+end;

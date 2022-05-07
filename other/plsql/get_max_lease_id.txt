@@ -1,0 +1,10 @@
+create or replace function get_max_lease_id
+return varchar is
+    max_lease_id varchar(8) := 0;
+
+begin
+    select MAX(CAST(lease_id as integer)) into max_lease_id 
+    from lease;
+
+    return max_lease_id;
+end;

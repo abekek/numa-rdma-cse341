@@ -1,0 +1,10 @@
+create or replace function get_max_visit_id
+return varchar is
+    max_visit_id varchar(8) := 0;
+
+begin
+    select MAX(visit_id) into max_visit_id 
+    from visit_data;
+
+    return max_visit_id;
+end;

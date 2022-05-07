@@ -1,0 +1,10 @@
+create or replace function get_max_payment_id
+return varchar is
+    max_payment_id varchar(8) := 0;
+
+begin
+    select MAX(CAST(payment_id as integer)) into max_payment_id 
+    from payment;
+
+    return max_payment_id;
+end;

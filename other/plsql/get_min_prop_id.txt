@@ -1,0 +1,10 @@
+create or replace function get_min_prop_id
+return number is
+    min_prop_id number := 0;
+
+begin
+    select MIN(CAST(prop_id as integer)) into min_prop_id 
+    from property;
+
+    return min_prop_id;
+end;

@@ -1,0 +1,10 @@
+create or replace function get_max_id
+return number is
+    max_id number := 0;
+
+begin
+    select MAX(CAST(id as integer)) into max_id 
+    from tenant;
+
+    return max_id;
+end;

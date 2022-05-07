@@ -1,0 +1,10 @@
+create or replace function get_max_prop_id
+return number is
+    max_prop_id number := 0;
+
+begin
+    select MAX(CAST(prop_id as integer)) into max_prop_id 
+    from property;
+
+    return max_prop_id;
+end;
