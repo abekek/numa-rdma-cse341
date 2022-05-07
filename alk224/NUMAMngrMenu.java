@@ -132,6 +132,8 @@ public class NUMAMngrMenu {
             }
         } while(true);
 
+        double currentRent = 0;
+
         try{
             query = String.format("select * from apartment where prop_id='%s' and apt_num='%s'", propertyId, apartmentNum);
             ResultSet rs = s.executeQuery(query);
@@ -141,6 +143,7 @@ public class NUMAMngrMenu {
                 System.out.println("Apartment is already rented. Raise is not allowed.");
                 return;
             }
+            currentRent = rs.getDouble("monthly_rent");
         } catch(SQLException e){
             System.out.println("Error: " + e.getMessage());
             return;
@@ -148,7 +151,7 @@ public class NUMAMngrMenu {
 
         double rent = 0;
         do{
-            System.out.printf("Please enter the raised rent amount: $");
+            System.out.printf("Please enter the raised rent amount (current rate is $%.2f): $", currentRent);
             // validating entered choice
             if (!scnr.hasNextDouble()){
                 System.out.println("Please input a double.\n");

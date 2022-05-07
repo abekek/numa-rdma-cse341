@@ -105,3 +105,51 @@ begin
         end loop;
     end if;
 end;
+
+create or replace trigger decrement_apt_available after insert on lease
+referencing new as nrow
+for each row
+
+declare 
+    pid number;
+    apt_count number;
+
+begin
+    select prop_id
+    into pid
+    from apartment
+    where lease_id = :nrow.lease_id;
+
+    select apt_available
+    into apt_count
+    from property
+    where prop_id=pid;
+
+    update property
+    set apt_available = apt_count - 1
+    where prop_id = pid;
+end;
+
+create or replace trigger increment_apt_available after delete on lease
+referencing new as orow
+for each row
+
+declare
+    pid number;
+    apt_count number;
+
+begin
+    select prop_id
+    into pid
+    from apartment
+    where lease_id = :orow.lease_id;
+
+    select apt_available
+    into apt_count
+    from property
+    where prop_id=pid;
+
+    update property
+    set apt_available = apt_count + 1
+    where prop_id = pid;
+end;
