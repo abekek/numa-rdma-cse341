@@ -13,7 +13,8 @@ public class NUMAMngrMenu {
             System.out.println("2. Remove a Property");
             System.out.println("3. Edit a Property");
             System.out.println("4. View a List of Properties");
-            System.out.println("5. Exit");
+            System.out.println("5. Raise rent");
+            System.out.println("6. Exit");
             System.out.print("Enter your choice: ");
 
             // validating entered choice
@@ -66,13 +67,110 @@ public class NUMAMngrMenu {
                     viewProperty(con, s, scnr);
                     break;
                 case 5:
+                    raiseRent(con, s, scnr);
+                    break;
+                case 6:
                     System.out.println("Exiting to main menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-        } while(choice != 5);
+        } while(choice != 6);
+    }
+
+    public static void raiseRent(Connection con, Statement s, Scanner scnr){
+        System.out.println("\nRaise Rent");
+        System.out.println("===========");
+        String propertyId = "";
+        String apartmentNum = "";
+        String query = "";
+
+        do{
+            try {
+                ResultSet rs = s.executeQuery("select count(*) from property");
+                rs.next();
+                int numProperties = rs.getInt(1);
+
+                query = String.format("select distinct get_min_prop_id() from property");
+                rs = s.executeQuery(query);
+                rs.next();
+                String min_propertyId = rs.getString(1);
+            
+                System.out.printf("\nPlease enter the property ID (Hint: there are %d properties starting with index %s): ", numProperties, min_propertyId);
+                propertyId = scnr.next();
+                try{
+                    query = String.format("select * from property where prop_id='%s'", propertyId);
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    rs.getString("prop_id");
+                } catch(SQLException e){
+                    System.out.println("Property ID not found.");
+                    continue;
+                }
+
+                query = String.format("select count(*) from apartment where prop_id='%s'", propertyId);
+                rs = s.executeQuery(query);
+                rs.next();
+                int numApartments = rs.getInt(1);
+
+                System.out.printf("Please enter the apartment number (Hint: there are %d apartments in this property): ", numApartments);
+                apartmentNum = scnr.next();
+                try{
+                    query = String.format("select * from apartment where prop_id='%s' and apt_num='%s'", propertyId, apartmentNum);
+                    rs = s.executeQuery(query);
+                    rs.next();
+                    rs.getString("lease_id");
+                } catch(SQLException e){
+                    System.out.println("Apartment number not found.");
+                    continue;
+                }
+                break;
+            } catch(SQLException e){
+                System.out.println("Error: " + e.getMessage());
+                continue;
+            }
+        } while(true);
+
+        try{
+            query = String.format("select * from apartment where prop_id='%s' and apt_num='%s'", propertyId, apartmentNum);
+            ResultSet rs = s.executeQuery(query);
+            rs.next();
+            String leaseId = rs.getString("lease_id");
+            if(leaseId != null){
+                System.out.println("Apartment is already rented. Raise is not allowed.");
+                return;
+            }
+        } catch(SQLException e){
+            System.out.println("Error: " + e.getMessage());
+            return;
+        }
+
+        double rent = 0;
+        do{
+            System.out.printf("Please enter the raised rent amount: $");
+            // validating entered choice
+            if (!scnr.hasNextDouble()){
+                System.out.println("Please input a double.\n");
+                scnr.next();
+                continue;
+            } else {
+                rent = scnr.nextDouble();
+                if(rent < 0){
+                    System.out.println("Please input a positive amount.");
+                    continue;
+                }
+                break;
+            }
+        } while(true);
+
+        try{
+            query = String.format("update apartment set monthly_rent='%s' where prop_id='%s' and apt_num='%s'", rent, propertyId, apartmentNum);
+            s.executeUpdate(query);
+            System.out.println("Rent raised successfully.");
+        } catch(SQLException e){
+            System.out.println("Rent could not be raised.");
+        }
     }
 
     public static void editProperty(Connection con, Statement s, Scanner scnr, String propertyId){
@@ -318,6 +416,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         numApartments = scnr.nextInt();
+                        if(numApartments < 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(numApartments <= 0);
@@ -332,6 +434,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         numAmenities = scnr.nextInt();
+                        if(numAmenities < 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(numAmenities <= 0);
@@ -346,6 +452,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         minRent = scnr.nextInt();
+                        if(minRent <= 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(minRent <= 0);
@@ -360,9 +470,17 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         maxRent = scnr.nextInt();
+                        if(maxRent < minRent){
+                            System.out.println("Maximum rent cannot be less than minimum rent.\n");
+                            continue;
+                        }
+                        if(maxRent <= 0){
+                            System.out.println("Maximum rent cannot be less than or equal to 0.\n");
+                            continue;
+                        }
                         break;
                     }
-                } while(maxRent <= 0);
+                } while(true);
 
                 System.out.println("\nWhat is the minimum secutiry deposit of the apartment?");
                 int minDeposit = -1;
@@ -374,6 +492,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         minDeposit = scnr.nextInt();
+                        if(minDeposit <= 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(minDeposit <= 0);
@@ -388,9 +510,17 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         maxDeposit = scnr.nextInt();
+                        if(maxDeposit < minDeposit){
+                            System.out.println("Maximum security deposit must be greater than or equal to minimum security deposit.\n");
+                            continue;
+                        }
+                        if(maxDeposit <= 0){
+                            System.out.println("Maximum security deposit must be greater than zero.\n");
+                            continue;
+                        }
                         break;
                     }
-                } while(maxDeposit <= 0);
+                } while(true);
 
                 System.out.println("\nWhat is the minimum number of bedrooms of the apartment?");
                 int minBedrooms = -1;
@@ -402,6 +532,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         minBedrooms = scnr.nextInt();
+                        if(minBedrooms < 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(minBedrooms <= 0);
@@ -416,9 +550,17 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         maxBedrooms = scnr.nextInt();
+                        if(maxBedrooms < minBedrooms){
+                            System.out.println("Maximum number of bedrooms must be greater than or equal to minimum number of bedrooms.\n");
+                            continue;
+                        }
+                        if(maxBedrooms <= 0){
+                            System.out.println("Maximum number of bedrooms must be greater than 0.\n");
+                            continue;
+                        }
                         break;
                     }
-                } while(maxBedrooms <= 0);
+                } while(true);
 
                 System.out.println("\nWhat is the minimum number of bathrooms of the apartment?");
                 int minBathrooms = -1;
@@ -430,6 +572,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         minBathrooms = scnr.nextInt();
+                        if(minBathrooms < 0){
+                            System.out.println("Please input a positive number.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(minBathrooms <= 0);
@@ -444,9 +590,17 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         maxBathrooms = scnr.nextInt();
+                        if(maxBathrooms < minBathrooms){
+                            System.out.println("Maximum number of bathrooms must be greater than or equal to minimum number of bathrooms.\n");
+                            continue;
+                        }
+                        if(maxBathrooms <= 0){
+                            System.out.println("Maximum number of bathrooms must be greater than 0.\n");
+                            continue;
+                        }
                         break;
                     }
-                } while(maxBathrooms <= 0);
+                } while(true);
 
                 System.out.println("\nWhat is the minimum square foot area of the apartment?");
                 int minArea = -1;
@@ -458,6 +612,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         minArea = scnr.nextInt();
+                        if(minArea <= 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(minArea <= 0);
@@ -472,9 +630,17 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         maxArea = scnr.nextInt();
+                        if(maxArea < minArea){
+                            System.out.println("The maximum area must be greater than or equal to the minimum area.\n");
+                            continue;
+                        }
+                        if(maxArea <= 0){
+                            System.out.println("The maximum area must be greater than 0.\n");
+                            continue;
+                        }
                         break;
                     }
-                } while(maxArea <= 0);
+                } while(true);
 
                 System.out.println("\nHow many floors would the property have?");
                 int numFloors = -1;
@@ -486,6 +652,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         numFloors = scnr.nextInt();
+                        if(numFloors <= 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(numFloors <= 0);
@@ -500,6 +670,10 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         minFee = scnr.nextInt();
+                        if(minFee < 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
                 } while(minFee <= 0);
@@ -514,9 +688,17 @@ public class NUMAMngrMenu {
                         continue;
                     } else {
                         maxFee = scnr.nextInt();
+                        if(maxFee < minFee){
+                            System.out.println("The maximum fee must be greater than or equal to the minimum fee.\n");
+                            continue;
+                        }
+                        if(maxFee < 0){
+                            System.out.println("Please input a positive integer.\n");
+                            continue;
+                        }
                         break;
                     }
-                } while(maxFee <= 0);
+                } while(true);
 
                 query = "select distinct get_max_prop_id() from property";
                 ResultSet rs = s.executeQuery(query);
@@ -559,15 +741,15 @@ public class NUMAMngrMenu {
                 cs.execute();
                 System.out.println("Amenities have been randomly populated.\n");
 
+                System.out.println("Please, be sure to update other necessary information about the property.");
+
                 cs.close();
             } catch(SQLException e){
                 System.out.println("\nError adding property/populating apartments." + e.getMessage());
             }
         } else {
-            System.out.println("\nProperty not removed.");
+            System.out.println("\nProperty not added.");
         }
-
-        System.out.println("Please, be sure to update other necessary information about the property.");
     }
 
     public static void removeProperty(Connection con, Statement s, Scanner scnr){

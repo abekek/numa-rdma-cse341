@@ -121,6 +121,10 @@ public class PropMngMenu {
                 continue;
             } else {
                 noticePeriod = scnr.nextInt();
+                if(noticePeriod < 1){
+                    System.out.println("Please input a positive number.\n");
+                    continue;
+                }
                 break;
             }
         } while(true);
@@ -148,6 +152,10 @@ public class PropMngMenu {
                 continue;
             } else {
                 term = scnr.nextInt();
+                if(term < 1){
+                    System.out.println("Please enter a positive integer.\n");
+                    continue;
+                }
                 break;
             }
         } while(true);
@@ -442,6 +450,10 @@ public class PropMngMenu {
                     continue;
                 } else {
                     rate = scnr.nextDouble();
+                    if(rate < 0){
+                        System.out.println("Please enter a positive number.\n");
+                        continue;
+                    }
                     break;
                 }
             } while(true);
@@ -457,6 +469,10 @@ public class PropMngMenu {
                     continue;
                 } else {
                     parkingRate = scnr.nextDouble();
+                    if(parkingRate < 0){
+                        System.out.println("Please enter a positive number.\n");
+                        continue;
+                    }
                     break;
                 }
             } while(true);

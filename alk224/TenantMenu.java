@@ -218,7 +218,7 @@ public class TenantMenu{
             System.out.printf("\nTenant registered successfully. Your tenant ID is %s\n", Integer.toString(maxId + 1));
             startLoggedTenantMenu(con, s, scnr, Integer.toString(maxId + 1));
         } catch(SQLException e){
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage()+ ". Password is too long.");
         }
     }
 
@@ -231,7 +231,8 @@ public class TenantMenu{
             System.out.println("2. View your apartment information");
             System.out.println("3. Update Personal Data");
             System.out.println("4. Lease Actions");
-            System.out.println("5. Exit");
+            System.out.println("5. Update Password");
+            System.out.println("6. Exit");
             System.out.print("Enter your choice: ");
 
             // validating entered choice
@@ -257,13 +258,61 @@ public class TenantMenu{
                     leaseActions(con, s, scnr, tenantId);
                     break;
                 case 5:
+                    updatePassword(con, s, scnr, tenantId);
+                    break;
+                case 6:
                     System.out.println("Exiting to tenant menu.");
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.\n");
                     continue;
             }
-        } while(choice != 5);
+        } while(choice != 6);
+    }
+
+    public static void updatePassword(Connection con, Statement s, Scanner scnr, String tenantId){
+        String password = "";
+        String confirmPassword = "";
+
+        do{
+            System.out.printf("Enter a new password (or q to exit): ");
+            password = scnr.next();
+            if(password.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(password.length() < 8){
+                System.out.println("Password must be at least 8 characters long. Please try again.");
+                continue;
+            }
+            System.out.printf("Confirm password your password (or q to exit): ");
+            confirmPassword = scnr.next();
+            if(confirmPassword.equals("q")){
+                System.out.println("Exiting.");
+                return;
+            }
+            if(!password.equals(confirmPassword)){
+                System.out.println("Passwords do not match. Please try again.");
+                continue;
+            }
+        } while(!password.equals(confirmPassword));
+
+        String hexPassword = "";
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
+            hexPassword = bytesToHex(hash);
+        } catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        String query = String.format("update tenant set password='%s' where id='%s'", hexPassword, tenantId);
+        try{
+            s.executeUpdate(query);
+            System.out.println("Password updated successfully.");
+        } catch(SQLException e){
+            System.out.println("Error: " + e.getMessage() + ". Password is too long.");
+        }
     }
 
     public static void leaseActions(Connection con, Statement s, Scanner scnr, String tenantId){
@@ -928,6 +977,10 @@ public class TenantMenu{
                 continue;
             } else {
                 newNumDep = scnr.nextInt();
+                if(newNumDep < 0){
+                    System.out.println("Please input a positive number.\n");
+                    continue;
+                }
                 break;
             }
         } while(true);
